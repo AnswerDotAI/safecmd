@@ -127,14 +127,14 @@ class DisallowedCmd(PermissionError):
 
 # %% ../nbs/01_core.ipynb 36
 def safe_run(
-        cmd:str,  # Bash command string to execute
-        cmds:str=None,  # Allowed commands (comma-separated, config format); defaults to ok_cmds
-        ops:str=None,  # Allowed operators (comma-separated); defaults to ok_ops
-        add_cmds:str=None,  # Temp add these commands
-        add_ops:str=None,  # Temp add these operators
-        rm_cmds:str=None,  # Temp remove these commands
-        rm_ops:str=None,  # Temp remove these operators
-    ) -> str:  # Combined stdout/stderr output
+    cmd:str,  # Bash command string to execute
+    cmds:str=None,  # Allowed commands (comma-separated, config format); defaults to ok_cmds
+    ops:str=None,  # Allowed operators (comma-separated); defaults to ok_ops
+    add_cmds:str=None,  # Temp add these commands
+    add_ops:str=None,  # Temp add these operators
+    rm_cmds:str=None,  # Temp remove these commands
+    rm_ops:str=None,  # Temp remove these operators
+) -> str:  # Combined stdout/stderr output
     "Run `cmd` in shell if all commands and operators are in allowlists, else raise"
     eff_ops = _split_set(ops) if ops else ok_ops.copy()
     eff_cmds = _split_specs(cmds) if cmds else ok_cmds.copy()

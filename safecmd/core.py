@@ -114,10 +114,10 @@ def validate_cmd(toks, cmds=None):
 
 # %% ../nbs/01_core.ipynb 37
 class DisallowedOps(PermissionError):
-    def __init__(self, ops): super().__init__(f"Disallowed operators: {ops}")
+    def __init__(self, ops): super().__init__(f"{ops}")
 
 class DisallowedCmd(PermissionError):
-    def __init__(self, cmd): super().__init__(f"Disallowed command: {' '.join(cmd)}")
+    def __init__(self, cmd): super().__init__(' '.join(cmd))
 
 def safe_run(cmd, cmds=None, ops=None):
     "Run `cmd` in shell if all commands and operators are in allowlists, else raise"

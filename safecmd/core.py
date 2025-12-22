@@ -6,7 +6,7 @@
 __all__ = ['default_cfg', 'cfg_path', 'ok_ops', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedOps',
            'DisallowedCmd', 'safe_run']
 
-# %% ../nbs/01_core.ipynb 1
+# %% ../nbs/01_core.ipynb
 import subprocess,json,shutil
 from fastcore.utils import *
 from fastcore.xdg import xdg_config_home
@@ -14,7 +14,7 @@ from configparser import ConfigParser
 
 from .bashxtract import *
 
-# %% ../nbs/01_core.ipynb 11
+# %% ../nbs/01_core.ipynb
 def run(cmd, ignore_ex=False):
     "Run `cmd` in shell; return stdout (+ stderr if any); raise IOError on failure"
     res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -24,7 +24,7 @@ def run(cmd, ignore_ex=False):
     if res.returncode: raise IOError(out)
     return out
 
-# %% ../nbs/01_core.ipynb 16
+# %% ../nbs/01_core.ipynb
 class CmdSpec(BasicRepr):
     def __init__(self,
         name,  # the command (str, will be split into tuple)
@@ -51,7 +51,7 @@ class CmdSpec(BasicRepr):
         if tuple(toks[:len(self.name)]) != self.name: return False
         return not (self.denied and self.denied & set(toks))
 
-# %% ../nbs/01_core.ipynb 24
+# %% ../nbs/01_core.ipynb
 default_cfg = '''[DEFAULT]
 ok_ops = |, <, &&, ||, ;
 
@@ -67,11 +67,11 @@ ok_cmds = cat, head, tail, less, more, bat
     # Comparison
     diff, cmp, comm
     # Archives
-    tar, unzip, gunzip, bunzip2, unrar
+    unzip, gunzip, bunzip2, unrar
     # Network
-    curl, wget, ping, dig, nslookup, host
+    ping, dig, nslookup, host
     # System info
-    date, cal, uptime, whoami, hostname, uname, env, printenv
+    date, cal, uptime, whoami, hostname, uname, printenv
     # Utilities
     echo, printf, yes, seq, basename, dirname, realpath
     # Git (read-only)
@@ -80,17 +80,20 @@ ok_cmds = cat, head, tail, less, more, bat
     git ls-files, git ls-tree, git cat-file, git config --get, git config --list
     # Git (workspace)
     git fetch, git add, git commit, git switch, git checkout
-    # Find with deny-list
-    find:-exec|-execdir|-delete|-ok|-okdir
     # Builtins
     cd, pwd, export, test, [, true, false
+    # Deny-lists
+    find:-exec|-execdir|-delete|-ok|-okdir
+    rg:--pre
+    tar:--to-command|--use-compress-program|-I|--transform|--checkpoint-action|--info-script|--new-volume-script
+    curl:-o|--output|-O|--remote-name
 '''
 
-# %% ../nbs/01_core.ipynb 25
+# %% ../nbs/01_core.ipynb
 cfg_path = xdg_config_home() / 'safecmd' / 'config.ini'
 if not cfg_path.exists(): cfg_path.mk_write(default_cfg)
 
-# %% ../nbs/01_core.ipynb 27
+# %% ../nbs/01_core.ipynb
 def _split_set(s):
     "Split comma-separated string into set of stripped strings"
     return {o.strip() for o in s.split(',')} if s else set()
@@ -109,23 +112,23 @@ def parse_cfg(cfg_str):
     ok_cmds = _split_specs(splitcmds)
     return ok_ops, ok_cmds
 
-# %% ../nbs/01_core.ipynb 28
+# %% ../nbs/01_core.ipynb
 ok_ops,ok_cmds = parse_cfg(cfg_path.read_text())
 
-# %% ../nbs/01_core.ipynb 32
+# %% ../nbs/01_core.ipynb
 def validate_cmd(toks, cmds=None):
     "Check if toks matches an allowed command; returns False if denied flags present"
     if cmds is None: cmds = ok_cmds
     return any(spec(toks) for spec in cmds)
 
-# %% ../nbs/01_core.ipynb 35
+# %% ../nbs/01_core.ipynb
 class DisallowedOps(PermissionError):
     def __init__(self, ops): super().__init__(f"{ops}")
 
 class DisallowedCmd(PermissionError):
     def __init__(self, cmd): super().__init__(' '.join(cmd))
 
-# %% ../nbs/01_core.ipynb 36
+# %% ../nbs/01_core.ipynb
 def safe_run(
     cmd:str,  # Bash command string to execute
     cmds:str=None,  # Allowed commands (comma-separated, config format); defaults to ok_cmds

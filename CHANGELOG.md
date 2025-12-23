@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.4
+
+### New Features
+
+- Add tools ([#3](https://github.com/AnswerDotAI/safecmd/issues/3))
+
+
 ## 0.0.3
 
 ### New Features

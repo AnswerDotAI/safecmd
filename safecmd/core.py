@@ -4,7 +4,8 @@
 
 # %% auto 0
 __all__ = ['default_cfg', 'cfg_path', 'ok_ops', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedOps',
-           'DisallowedCmd', 'safe_run']
+           'DisallowedCmd', 'safe_run', 'bash', 'unsafe_bash', 'add_allowed_cmds', 'add_allowed_ops', 'rm_allowed_cmds',
+           'rm_allowed_ops']
 
 # %% ../nbs/01_core.ipynb
 import subprocess,json,shutil
@@ -152,3 +153,52 @@ def safe_run(
     for c in commands:
         if not validate_cmd(c, eff_cmds): raise DisallowedCmd(c)
     return run(cmd)
+
+# %% ../nbs/01_core.ipynb
+def bash(
+    cmd:str,  # Bash command string to execute - all shell features like pipes and subcommands are supported
+    rm_cmds:str=None,  # Temp remove these commands from allow list
+    rm_ops:str=None  # Temp remove these operators from allow list
+): # dict with 'success' or 'error' key; value is stdout+stderr for success, or error message otherwise
+    """Run a bash shell command line safely and return the output. `cmd` is parsed and all calls are checked against an allow-list.
+    If the command is not allowed, STOP and inform the user of the command run and error details; so they can decide whether to whitelist
+    it or run it themselves. The default allow-list includes most standard unix commands and git subcommands that do not change state or are easily reverted.
+    All operators are supported (including `;`, `&&`, `||`, pipes, and subshells), except output redirection.
+    rm_ params are comma-separated strs."""
+    try: return {'success': safe_run(cmd, rm_cmds=rm_cmds, rm_ops=rm_ops)}
+    except PermissionError as e: return {'error': e}
+
+# %% ../nbs/01_core.ipynb
+def unsafe_bash(
+    cmd:str,  # Bash command string to execute - all shell features like pipes and subcommands are supported
+    cmds:str=None,  # Allowed commands; defaults to ok_cmds; DO NOT USE without upfront user permission
+    ops:str=None,  # Allowed operators; defaults to ok_ops; DO NOT USE without upfront user permission
+    add_cmds:str=None,  # Temp add these commands to allow list; DO NOT USE without upfront user permission
+    add_ops:str=None,  # Temp add these operators to allow list; DO NOT USE without upfront user permission
+    rm_cmds:str=None,  # Temp remove these commands from allow list
+    rm_ops:str=None,  # Temp remove these operators from allow list
+): # dict with 'success' or 'error' key; value is stdout+stderr for success, or error message otherwise
+    """Run a bash shell command line safely and return the output. `cmd` is parsed and all calls are checked against an allow-list.
+    If the command is not allowed, STOP and inform the user of the command run and error details; so they can decide whether to whitelist
+    it or run it themselves.
+    The default allow-list includes most standard unix commands and git subcommands that do not change state or are easily reverted. All operators are supported (including `;`, `&&`, `||`, pipes, and subshells), except output redirection.
+    cmds/ops and add_/rm_ params are comma-separated strs."""
+    try: return {'success': safe_run(cmd, cmds, ops, add_cmds=add_cmds, add_ops=add_ops, rm_cmds=rm_cmds, rm_ops=rm_ops)}
+    except PermissionError as e: return {'error': e}
+
+# %% ../nbs/01_core.ipynb
+def add_allowed_cmds(cmds):
+    "Add comma-separated `cmds` to the allow list; (this can not be used as an LLM tool)"
+    ok_cmds.update(_split_specs(cmds))
+
+def add_allowed_ops(ops):
+    "Add comma-separated `ops` to the allow list; (this can not be used as an LLM tool)"
+    ok_ops.update(_split_set(ops))
+
+def rm_allowed_cmds(cmds:str):
+    "Remove comma-separated `cmds` from the allow list"
+    ok_cmds.difference_update({CmdSpec(c) for c in _split_set(cmds)})
+
+def rm_allowed_ops(ops):
+    "Remove comma-separated `ops` from the allow list"
+    ok_ops.difference_update(_split_set(ops))

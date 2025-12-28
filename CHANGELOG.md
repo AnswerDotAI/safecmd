@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.5
+
+### New Features
+
+- Add `ignore_ex` to `safe_run`, and add fd redirect ops ([#4](https://github.com/AnswerDotAI/safecmd/issues/4))
+
+
 ## 0.0.4
 
 ### New Features

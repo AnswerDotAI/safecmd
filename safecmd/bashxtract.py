@@ -68,7 +68,7 @@ def visit_stmts(stmts, cmd, commands=None):
     return commands
 
 # %% ../nbs/00_bashxtract.ipynb
-_op_map = {10: '&&', 11: '||', 12: '|', 54: '>', 55: '>>', 56: '<'}
+_op_map = {10: '&&', 11: '||', 12: '|', 13: '|&', 54: '>', 55: '>>', 56: '<', 58: '<&', 59: '>&', 64: '&>', 65: '&>>'}
 _attr_ops = {'Background': '&', 'Semicolon': ';', 'Assigns': '='}
 
 def collect_ops(node, ops=None):

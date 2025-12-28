@@ -54,7 +54,7 @@ class CmdSpec(BasicRepr):
 
 # %% ../nbs/01_core.ipynb
 default_cfg = '''[DEFAULT]
-ok_ops = |, <, &&, ||, ;
+ok_ops = |, <, &&, ||, ;, |&, <&file, <&fd, >&fd
 
 ok_cmds = cat, head, tail, less, more, bat
     # Directory listing
@@ -138,6 +138,7 @@ def safe_run(
     add_ops:str=None,  # Temp add these operators
     rm_cmds:str=None,  # Temp remove these commands
     rm_ops:str=None,  # Temp remove these operators
+    ignore_ex:bool=False,  # If True, return (returncode, output) instead of raising on error
 ) -> str:  # Combined stdout/stderr output
     "Run `cmd` in shell if all commands and operators are in allowlists, else raise"
     eff_ops = _split_set(ops) if ops else ok_ops.copy()
@@ -152,7 +153,7 @@ def safe_run(
     if bad_ops := used_ops - eff_ops: raise DisallowedOps(bad_ops)
     for c in commands:
         if not validate_cmd(c, eff_cmds): raise DisallowedCmd(c)
-    return run(cmd)
+    return run(cmd, ignore_ex=ignore_ex)
 
 # %% ../nbs/01_core.ipynb
 def bash(

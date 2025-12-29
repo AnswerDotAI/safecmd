@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.6
+
+### New Features
+
+- Add `safecmd` console script ([#5](https://github.com/AnswerDotAI/safecmd/issues/5))
+
+
 ## 0.0.5
 
 ### New Features

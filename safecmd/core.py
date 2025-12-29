@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['default_cfg', 'cfg_path', 'ok_ops', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedError',
            'DisallowedOps', 'DisallowedCmd', 'safe_run', 'bash', 'unsafe_bash', 'add_allowed_cmds', 'add_allowed_ops',
-           'rm_allowed_cmds', 'rm_allowed_ops']
+           'rm_allowed_cmds', 'rm_allowed_ops', 'main']
 
 # %% ../nbs/01_core.ipynb
 import subprocess,json,shutil
@@ -208,3 +208,15 @@ def rm_allowed_cmds(cmds:str):
 def rm_allowed_ops(ops):
     "Remove comma-separated `ops` from the allow list"
     ok_ops.difference_update(_split_set(ops))
+
+# %% ../nbs/01_core.ipynb
+import argparse,sys
+
+# %% ../nbs/01_core.ipynb
+def main():
+    p = argparse.ArgumentParser(description='Run a command (kinda) safely')
+    p.add_argument('cmd', nargs=argparse.REMAINDER, help='Command and arguments')
+    args = p.parse_args()
+    if not args.cmd: p.print_help(); sys.exit(1)
+    try: print(safe_run(' '.join(args.cmd)))
+    except DisallowedError as e: print(f"Command not allowed: {e}", file=sys.stderr); sys.exit(1)

@@ -1,0 +1,5 @@
+{
+  "name": "safecmd",
+  "description": "Auto-approve safe bash commands validated against safecmd's allowlist",
+  "version": "1.0.0"
+}

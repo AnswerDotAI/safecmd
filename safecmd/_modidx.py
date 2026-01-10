@@ -38,5 +38,6 @@ d = { 'settings': { 'branch': 'main',
                               'safecmd.core.run': ('core.html#run', 'safecmd/core.py'),
                               'safecmd.core.safe_run': ('core.html#safe_run', 'safecmd/core.py'),
                               'safecmd.core.unsafe_bash': ('core.html#unsafe_bash', 'safecmd/core.py'),
+                              'safecmd.core.validate': ('core.html#validate', 'safecmd/core.py'),
                               'safecmd.core.validate_cmd': ('core.html#validate_cmd', 'safecmd/core.py')},
             'safecmd.safecmd.bashxtract': {}}}

@@ -4,8 +4,8 @@
 
 # %% auto 0
 __all__ = ['default_cfg', 'cfg_path', 'ok_ops', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedError',
-           'DisallowedOps', 'DisallowedCmd', 'safe_run', 'bash', 'unsafe_bash', 'add_allowed_cmds', 'add_allowed_ops',
-           'rm_allowed_cmds', 'rm_allowed_ops', 'main']
+           'DisallowedOps', 'DisallowedCmd', 'validate', 'safe_run', 'bash', 'unsafe_bash', 'add_allowed_cmds',
+           'add_allowed_ops', 'rm_allowed_cmds', 'rm_allowed_ops', 'main']
 
 # %% ../nbs/01_core.ipynb
 import subprocess,json,shutil
@@ -133,6 +133,20 @@ class DisallowedCmd(DisallowedError):
     def __init__(self, cmd): super().__init__(' '.join(cmd))
 
 # %% ../nbs/01_core.ipynb
+def validate(
+    cmd:str,  # Bash command string to validate
+    cmds=None,  # Allowed commands set; defaults to ok_cmds
+    ops=None,  # Allowed operators set; defaults to ok_ops
+):
+    "Validate `cmd` against allowlists; raises DisallowedOps or DisallowedCmd on failure"
+    if cmds is None: cmds = ok_cmds
+    if ops is None: ops = ok_ops
+    commands, used_ops = extract_commands(cmd)
+    if bad_ops := used_ops - ops: raise DisallowedOps(bad_ops)
+    for c in commands:
+        if not validate_cmd(c, cmds): raise DisallowedCmd(c)
+
+# %% ../nbs/01_core.ipynb
 def safe_run(
     cmd:str,  # Bash command string to execute
     cmds:str=None,  # Allowed commands (comma-separated, config format); defaults to ok_cmds
@@ -152,10 +166,7 @@ def safe_run(
     eff_cmds |= _split_specs(add_cmds)
     eff_cmds -= {CmdSpec(c) for c in _split_set(rm_cmds)}
     
-    commands, used_ops = extract_commands(cmd)
-    if bad_ops := used_ops - eff_ops: raise DisallowedOps(bad_ops)
-    for c in commands:
-        if not validate_cmd(c, eff_cmds): raise DisallowedCmd(c)
+    validate(cmd, eff_cmds, eff_ops)
     return run(cmd, ignore_ex=ignore_ex)
 
 # %% ../nbs/01_core.ipynb

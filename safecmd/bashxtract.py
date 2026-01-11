@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['HANDLED_TYPES', 'parse_bash', 'part_text', 'word_text', 'nested_stmts', 'visit_stmts', 'collect_ops',
-           'collect_redirects', 'check_types', 'extract_commands']
+           'collect_redirects', 'scan_flag_args', 'check_types', 'extract_commands']
 
 # %% ../nbs/00_bashxtract.ipynb
 import shlex,subprocess,json,shutil
@@ -97,6 +97,25 @@ def collect_redirects(node, cmd, redirects=None):
     return redirects
 
 # %% ../nbs/00_bashxtract.ipynb
+def scan_flag_args(commands, exec_flags=None, dest_flags=None):
+    "Scan commands for exec/dest flags and extract their arguments"
+    extra_cmds, extra_dests = [], []
+    if not exec_flags: exec_flags = {}
+    if not dest_flags: dest_flags = {}
+    
+    for toks in commands:
+        if not toks: continue
+        cmd_name = toks[0]
+        if cmd_name in exec_flags:
+            for i, tok in enumerate(toks[:-1]):
+                if tok in exec_flags[cmd_name]: extra_cmds.append(toks[i+1])
+        if cmd_name in dest_flags:
+            for i, tok in enumerate(toks[:-1]):
+                if tok in dest_flags[cmd_name]: extra_dests.append((tok, toks[i+1]))
+    
+    return extra_cmds, extra_dests
+
+# %% ../nbs/00_bashxtract.ipynb
 HANDLED_TYPES = {'File', 'CallExpr', 'BinaryCmd', 'Subshell', 'Block', 'IfClause', 'WhileClause', 
     'ForClause', 'CaseClause', 'CaseItem', 'FuncDecl', 'DeclClause', 'Lit', 'SglQuoted', 'DblQuoted',
     'ParamExp', 'CmdSubst', 'ProcSubst', 'Hdoc', 'Word', 'Redirect', 'Comment', 'ArithmExp', 'ArithmCmd'}
@@ -110,8 +129,21 @@ def check_types(node):
         elif isinstance(v, list): [check_types(x) for x in v]
 
 # %% ../nbs/00_bashxtract.ipynb
-def extract_commands(cmd, shfmt='shfmt'):
+def extract_commands(cmd, shfmt='shfmt', exec_flags=None, dest_flags=None):
     "Split bash command into (commands, operators, redirects)"
     ast = parse_bash(cmd, shfmt=shfmt)
     check_types(ast)
-    return visit_stmts(ast.get('Stmts', []), cmd), collect_ops(ast), collect_redirects(ast, cmd)
+    commands = visit_stmts(ast.get('Stmts', []), cmd)
+    ops = collect_ops(ast)
+    redirects = collect_redirects(ast, cmd)
+    
+    # Scan for exec/dest flags and process recursively
+    extra_cmds, extra_dests = scan_flag_args(commands, exec_flags, dest_flags)
+    for ecmd in extra_cmds:
+        nested_cmds, nested_ops, nested_redirs = extract_commands(ecmd, shfmt, exec_flags, dest_flags)
+        commands.extend(nested_cmds)
+        ops.update(nested_ops)
+        redirects.extend(nested_redirs)
+    redirects.extend(extra_dests)
+    
+    return commands, ops, redirects

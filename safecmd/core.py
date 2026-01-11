@@ -29,15 +29,23 @@ def run(cmd, ignore_ex=False):
 class CmdSpec(BasicRepr):
     def __init__(self,
         name,  # the command (str, will be split into tuple)
-        denied=None):  # if set, these flags blocked
+        denied=None,  # if set, these flags blocked
+        exec_flags=None,  # flags whose next arg is a command to validate
+        dest_flags=None   # flags whose next arg is a destination to validate
+    ):
         self.name = tuple(name.split())
-        self.denied = set(denied or [])
+        self.denied,self.exec_flags,self.dest_flags = set(denied or []),set(exec_flags or []),set(dest_flags or [])
 
     @classmethod
     def from_str(cls, s):
-        "Create from 'cmd:-flag1,-flag2' format"
-        name, _, denied = s.partition(':')
-        return cls(name, denied.split('|') if denied else None)
+        "Create from 'cmd:-flag1|-flag2:exec=-exec|-execdir:dest=-o|--output' format"
+        parts = s.split(':')
+        name,denied,exec_flags,dest_flags = parts[0],None,None,None
+        for p in parts[1:]:
+            if p.startswith('exec='): exec_flags = p[5:].split('|')
+            elif p.startswith('dest='): dest_flags = p[5:].split('|')
+            else: denied = p.split('|') if p else None
+        return cls(name, denied, exec_flags, dest_flags)
         
     def __hash__(self): return hash(self.name)
     def __eq__(self, b): return self.name==b.name
@@ -45,6 +53,8 @@ class CmdSpec(BasicRepr):
     def __repr__(self):
         s = ' '.join(self.name)
         if self.denied: s += f' !{self.denied}'
+        if self.exec_flags: s += f' exec={self.exec_flags}'
+        if self.dest_flags: s += f' dest={self.dest_flags}'
         return s
     
     def __call__(self, toks):
@@ -52,11 +62,9 @@ class CmdSpec(BasicRepr):
         if tuple(toks[:len(self.name)]) != self.name: return False
         if not self.denied: return True
         for d in self.denied:
-            if d in toks: return False  # exact match
-            # Long flag with =value: --flag=value matches --flag
+            if d in toks: return False
             if d.startswith('--'):
                 if any(tok.startswith(d + '=') for tok in toks): return False
-            # Single-letter short flag: check if letter appears in any combined -xyz arg
             elif len(d) == 2 and d[0] == '-':
                 for tok in toks:
                     if tok.startswith('-') and not tok.startswith('--') and d[1] in tok[1:]: return False
@@ -91,13 +99,56 @@ ok_cmds = cat, head, tail, less, more, bat
     git ls-files, git ls-tree, git cat-file, git config --get, git config --list
     # Git (workspace)
     git fetch, git add, git commit, git switch, git checkout
+    # gh
+    gh repo view, gh issue list, gh issue view, gh pr list, gh pr view, gh pr status, gh pr checks, gh pr diff
+    gh release list, gh release view, gh run list, gh run view, gh workflow list, gh workflow view
+    gh auth status, gh gist list, gh gist view, gh browse, gh search
+    # nbdev
+    nbdev_export, nbdev_clean
+    # npm (read-only)
+    npm list, npm ls, npm outdated, npm view, npm info, npm why, npm audit, npm config list, npm config get, npm search, npm pack
+    # yarn (read-only)
+    yarn list, yarn outdated, yarn why, yarn info, yarn config list, yarn config get
+    # pnpm (read-only)
+    pnpm list, pnpm ls, pnpm outdated, pnpm why, pnpm config list, pnpm config get
+    # bun (read-only)
+    bun pm ls, bun pm hash
+    # js install
+    npm install, yarn install, pnpm install, bun install
+    # Modern Unix (read-only)
+    bat, eza, exa, fd, fzf, dust, duf, tldr, zoxide, httpie, http, jq, yq
+    # Docker (read-only)
+    docker ps, docker images, docker logs, docker inspect, docker stats, docker top, docker diff, docker history, docker version, docker info
+    # Docker (workspace - reversible)
+    docker pull, docker build
+    # AWS (read-only)
+    aws s3 ls, aws s3 cp, aws sts get-caller-identity, aws iam get-user, aws iam list-users
+    aws ec2 describe-instances, aws ec2 describe-vpcs, aws ec2 describe-security-groups
+    aws logs describe-log-groups, aws logs filter-log-events, aws logs get-log-events
+    aws lambda list-functions, aws lambda get-function
+    aws cloudformation describe-stacks, aws cloudformation list-stacks
+    aws rds describe-db-instances, aws dynamodb list-tables, aws dynamodb describe-table
+    aws sqs list-queues, aws sns list-topics
+    aws configure list, aws configure get
+    # GCloud (read-only)
+    gcloud config list, gcloud config get-value, gcloud auth list
+    gcloud projects list, gcloud projects describe
+    gcloud compute instances list, gcloud compute instances describe, gcloud compute zones list, gcloud compute regions list
+    gcloud container clusters list, gcloud container clusters describe
+    gcloud functions list, gcloud functions describe, gcloud functions logs read
+    gcloud run services list, gcloud run services describe
+    gcloud sql instances list, gcloud sql instances describe
+    gcloud storage ls, gcloud storage cat
+    gcloud logging read
+    # toolslm
+    folder2ctx, repo2ctx
     # Builtins
     cd, pwd, export, test, [, true, false
-    # Deny-lists
-    find:-exec|-execdir|-delete|-ok|-okdir
+    # Exec/dest flag handling
+    find:-delete|-ok|-okdir:exec=-exec|-execdir
     rg:--pre
-    tar:--to-command|--use-compress-program|-I|--transform|--checkpoint-action|--info-script|--new-volume-script
-    curl:-o|--output|-O|--remote-name
+    tar:--use-compress-program|--transform|--checkpoint-action|--info-script|--new-volume-script:exec=--to-command|-I
+    curl:dest=-o|--output
 '''
 
 # %% ../nbs/01_core.ipynb
@@ -159,6 +210,15 @@ def validate_dest(dest, dests=None):
     return False
 
 # %% ../nbs/01_core.ipynb
+def _build_flag_dicts(cmds):
+    "Build exec_flags and dest_flags dicts from CmdSpec set"
+    exec_flags,dest_flags = {},{}
+    for spec in cmds:
+        name = spec.name[0] if len(spec.name) == 1 else ' '.join(spec.name)
+        if spec.exec_flags: exec_flags[name] = spec.exec_flags
+        if spec.dest_flags: dest_flags[name] = spec.dest_flags
+    return exec_flags, dest_flags
+
 def validate(
     cmd:str,  # Bash command string to validate
     cmds=None,  # Allowed commands set; defaults to ok_cmds
@@ -167,7 +227,8 @@ def validate(
     "Validate `cmd` against allowlists; raises DisallowedCmd or DisallowedDest on failure"
     if cmds is None: cmds = ok_cmds
     if dests is None: dests = ok_dests
-    commands, ops, redirects = extract_commands(cmd)
+    exec_flags, dest_flags = _build_flag_dicts(cmds)
+    commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags)
     for c in commands:
         if not validate_cmd(c, cmds): raise DisallowedCmd(c)
     for op, dest in redirects:

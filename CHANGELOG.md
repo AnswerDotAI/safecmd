@@ -2,14 +2,6 @@
 
 <!-- do not remove -->
 
-## 0.0.7
-
-### New Features
-
-- Extract validate() function for reusable command validation ([#6](https://github.com/AnswerDotAI/safecmd/issues/6))
-
-
-
 ## 0.1.0
 
 ### Breaking Changes

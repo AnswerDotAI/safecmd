@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.1
+
+### Bugs Squashed
+
+- Fix for loop support: handle Then/Else/Do as stmt lists and add WordIter type ([#7](https://github.com/AnswerDotAI/safecmd/issues/7))
+
+
 ## 0.1.0
 
 ### Breaking Changes

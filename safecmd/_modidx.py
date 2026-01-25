@@ -44,5 +44,4 @@ d = { 'settings': { 'branch': 'main',
                               'safecmd.core.unsafe_bash': ('core.html#unsafe_bash', 'safecmd/core.py'),
                               'safecmd.core.validate': ('core.html#validate', 'safecmd/core.py'),
                               'safecmd.core.validate_cmd': ('core.html#validate_cmd', 'safecmd/core.py'),
-                              'safecmd.core.validate_dest': ('core.html#validate_dest', 'safecmd/core.py')},
-            'safecmd.safecmd.bashxtract': {}}}
+                              'safecmd.core.validate_dest': ('core.html#validate_dest', 'safecmd/core.py')}}}

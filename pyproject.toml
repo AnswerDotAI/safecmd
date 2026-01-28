@@ -24,8 +24,14 @@ Documentation = "https://AnswerDotAI.github.io/safecmd"
 [project.entry-points.nbdev]
 safecmd = "safecmd._modidx:d"
 
+[project.scripts]
+safecmd=safecmd.core:main
+
 [tool.setuptools.dynamic]
 version = {attr = "safecmd.__version__"}
+
+[project.scripts]
+safecmd=safecmd.core:main
 
 [tool.setuptools.packages.find]
 include = ["safecmd"]

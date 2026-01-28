@@ -3,19 +3,16 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="safecmd"
+name = "safecmd"
 dynamic = ["version"]
 description = "Call commands safely by checking them rigorously against an allow-list"
 readme = "README.md"
-requires-python=">=3.9"
+requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
 authors = [{name = "Jeremy Howard", email = "github@jhoward.fastmail.fm"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-]
-dependencies = ["fastcore","shfmt-py"]
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore', 'shfmt-py']
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/safecmd"
@@ -24,8 +21,10 @@ Documentation = "https://AnswerDotAI.github.io/safecmd"
 [project.entry-points.nbdev]
 safecmd = "safecmd._modidx:d"
 
+
 [project.scripts]
 safecmd = "safecmd.core:main"
+
 [tool.setuptools.dynamic]
 version = {attr = "safecmd.__version__"}
 

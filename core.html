@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Core API for safecmd">
+
+<title>Core API – safecmd</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-000f0825b9c55ed21d14970d810c14a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Core API – safecmd">
+<meta property="og:description" content="Core API for safecmd">
+<meta property="og:site_name" content="safecmd">
+<meta name="twitter:title" content="Core API – safecmd">
+<meta name="twitter:description" content="Core API for safecmd">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">safecmd</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./core.html">Core API</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">safecmd</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bashxtract.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bashxtract API</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Core API</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#how-to-use" id="toc-how-to-use" class="nav-link" data-scroll-target="#how-to-use">How to use</a></li>
+  <li><a href="#api" id="toc-api" class="nav-link" data-scroll-target="#api">API</a>
+  <ul class="collapse">
+  <li><a href="#helpers" id="toc-helpers" class="nav-link" data-scroll-target="#helpers">Helpers</a></li>
+  <li><a href="#run" id="toc-run" class="nav-link" data-scroll-target="#run">run</a></li>
+  <li><a href="#command-specifications" id="toc-command-specifications" class="nav-link" data-scroll-target="#command-specifications">Command Specifications</a></li>
+  <li><a href="#cmdspec" id="toc-cmdspec" class="nav-link" data-scroll-target="#cmdspec">CmdSpec</a></li>
+  <li><a href="#default-allowlists" id="toc-default-allowlists" class="nav-link" data-scroll-target="#default-allowlists">Default Allowlists</a></li>
+  <li><a href="#parse_cfg" id="toc-parse_cfg" class="nav-link" data-scroll-target="#parse_cfg">parse_cfg</a></li>
+  <li><a href="#safe-execution" id="toc-safe-execution" class="nav-link" data-scroll-target="#safe-execution">Safe Execution</a></li>
+  <li><a href="#validate_cmd" id="toc-validate_cmd" class="nav-link" data-scroll-target="#validate_cmd">validate_cmd</a></li>
+  <li><a href="#disalloweddest" id="toc-disalloweddest" class="nav-link" data-scroll-target="#disalloweddest">DisallowedDest</a></li>
+  <li><a href="#disallowedcmd" id="toc-disallowedcmd" class="nav-link" data-scroll-target="#disallowedcmd">DisallowedCmd</a></li>
+  <li><a href="#disallowederror" id="toc-disallowederror" class="nav-link" data-scroll-target="#disallowederror">DisallowedError</a></li>
+  <li><a href="#validate_dest" id="toc-validate_dest" class="nav-link" data-scroll-target="#validate_dest">validate_dest</a></li>
+  <li><a href="#normalize_dest" id="toc-normalize_dest" class="nav-link" data-scroll-target="#normalize_dest">normalize_dest</a></li>
+  <li><a href="#validate" id="toc-validate" class="nav-link" data-scroll-target="#validate">validate</a></li>
+  <li><a href="#safe_run" id="toc-safe_run" class="nav-link" data-scroll-target="#safe_run">safe_run</a></li>
+  </ul></li>
+  <li><a href="#bash-tool" id="toc-bash-tool" class="nav-link" data-scroll-target="#bash-tool">Bash tool</a>
+  <ul class="collapse">
+  <li><a href="#bash" id="toc-bash" class="nav-link" data-scroll-target="#bash">bash</a></li>
+  <li><a href="#unsafe_bash" id="toc-unsafe_bash" class="nav-link" data-scroll-target="#unsafe_bash">unsafe_bash</a></li>
+  <li><a href="#rm_allowed_dests" id="toc-rm_allowed_dests" class="nav-link" data-scroll-target="#rm_allowed_dests">rm_allowed_dests</a></li>
+  <li><a href="#rm_allowed_cmds" id="toc-rm_allowed_cmds" class="nav-link" data-scroll-target="#rm_allowed_cmds">rm_allowed_cmds</a></li>
+  <li><a href="#add_allowed_dests" id="toc-add_allowed_dests" class="nav-link" data-scroll-target="#add_allowed_dests">add_allowed_dests</a></li>
+  <li><a href="#add_allowed_cmds" id="toc-add_allowed_cmds" class="nav-link" data-scroll-target="#add_allowed_cmds">add_allowed_cmds</a></li>
+  </ul></li>
+  <li><a href="#cli" id="toc-cli" class="nav-link" data-scroll-target="#cli">CLI</a>
+  <ul class="collapse">
+  <li><a href="#main" id="toc-main" class="nav-link" data-scroll-target="#main">main</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/safecmd/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="core.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Core API</h1>
+</div>
+
+<div>
+  <div class="description">
+    Core API for safecmd
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p><code>safecmd.core</code> provides a safe execution layer for shell commands. It’s designed for situations where you need to run bash commands from untrusted sources—such as LLM-generated commands—while ensuring they can’t modify your system in dangerous ways.</p>
+<p>The module builds on top of <code>safecmd.bashxtract</code> (which parses bash into an AST and extracts commands) to validate commands against an allowlist before execution. The key insight is that rather than trying to blacklist dangerous commands (which is error-prone), we whitelist a generous set of read-only and easily-reverted commands that are safe to run.</p>
+<p>The core workflow is:</p>
+<ol type="1">
+<li>Parse the bash command string using <a href="https://AnswerDotAI.github.io/safecmd/bashxtract.html#extract_commands"><code>extract_commands()</code></a> from bashxtract</li>
+<li>Check each extracted command against <code>ok_cmds</code> (the allowlist). Commands inside substitutions (<code>$(...)</code>), subshells, pipelines, etc are extracted recursively, so nested commands are also validated.</li>
+<li>Check that output redirects only write to allowed destinations (default: <code>./</code> and <code>/tmp</code>)</li>
+<li>If everything passes, execute the command and return the result</li>
+</ol>
+<p>This approach handles complex bash syntax correctly—pipelines, command substitutions, subshells, and more—because it uses a proper bash parser rather than regex or string splitting.</p>
+<p>The allowlist (<code>ok_cmds</code>) uses <strong>prefix matching</strong> to determine if a command is permitted. A simple entry like <code>'ls'</code> matches any command starting with <code>ls</code>—so <code>ls</code>, <code>ls -la</code>, and <code>ls /home/user</code> are all allowed. A multi-word entry like <code>'git status'</code> only matches commands that start with both those words—so <code>git status</code> and <code>git status --short</code> are allowed, but <code>git push</code> is not.</p>
+<p>This prefix approach lets you be precise about which subcommands are safe. For instance, you might allow <code>git log</code>, <code>git status</code>, and <code>git diff</code> (all read-only) while blocking <code>git push</code> and <code>git reset</code> (which modify state).</p>
+<p>Some commands are mostly safe but have a few dangerous flags. For these cases, you can specify a <strong>denied list</strong> of flags that will cause the command to be rejected. For example, <code>find</code> allows searching but blocks <code>-delete</code> which would remove files.</p>
+<p>Some flags take arguments that themselves need validation. <strong>Exec flags</strong> (like <code>find -exec</code>) have a next argument that’s a command—this command is parsed and validated recursively. So <code>find . -exec ls</code> passes (since <code>ls</code> is allowed) but <code>find . -exec rm</code> fails. <strong>Dest flags</strong> (like <code>curl -o</code>) have a next argument that’s an output destination—this is validated against <code>ok_dests</code>. So <code>curl -o /tmp/file url</code> passes but <code>curl -o /etc/passwd url</code> fails.</p>
+<p>Output redirects (<code>&gt;</code>, <code>&gt;&gt;</code>, etc.) are also validated. By default, redirects can only write to the current directory (<code>./</code>) or <code>/tmp</code>. Bare relative paths like <code>file.txt</code> are normalized to <code>./file.txt</code> before matching. You can customize allowed destinations via <code>ok_dests</code>.</p>
+<p>The first time this module is used a config file (<code>config.ini</code>) is created with the default configuration. The file location follows the XDG Base Directory spec via <code>xdg_config_home()</code>:</p>
+<ul>
+<li><strong>Linux</strong>: <code>~/.config/safecmd/config.ini</code></li>
+<li><strong>macOS</strong>: <code>~/Library/Application Support/safecmd/config.ini</code></li>
+<li><strong>Windows</strong>: <code>%LOCALAPPDATA%\safecmd\config.ini</code> (typically <code>C:\Users\&lt;username&gt;\AppData\Local\safecmd\config.ini</code>)</li>
+</ul>
+<p>This file can be edited to change configuration.</p>
+</section>
+<section id="how-to-use" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use">How to use</h2>
+<p>The simplest way to use safecmd is to call <a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run()</code></a> with a bash command string. This function validates the command against the built-in allowlist and executes it if safe, returning the combined stdout/stderr output as a string. If the command fails, it raises an <code>IOError</code>. If the command or destinations aren’t allowed, it raises either <a href="https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd"><code>DisallowedCmd</code></a> or <a href="https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest"><code>DisallowedDest</code></a>.</p>
+<p>For example: <code>safe_run('ls -la | grep py')</code> will execute and return the filtered directory listing, while <code>safe_run('rm -rf /')</code> will raise a <a href="https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd"><code>DisallowedCmd</code></a> exception before anything dangerous happens.</p>
+<p>The module comes with a predefined set of safe commands. This includes common read-only utilities like <code>cat</code>, <code>grep</code>, <code>ls</code>, <code>diff</code>, builtins like <code>cd</code>, <code>export</code>, <code>[,</code> and <code>true</code>, as well as safe git subcommands like <code>git log</code>, <code>git status</code>, and <code>git diff</code>. Commands like <code>find</code> have exec flags configured so that <code>find . -exec ls</code> passes but <code>find . -exec rm</code> fails. Commands like <code>curl</code> have dest flags so <code>curl -o /tmp/file</code> passes but writing to disallowed paths fails.</p>
+<p>Output redirects are allowed but only to permitted destinations. By default, commands can write to the current directory (<code>./</code>) and <code>/tmp</code>. You can customize this by passing a <code>dests</code> parameter to <a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run()</code></a>. For example, <code>safe_run(cmd, add_dests='~/')</code> would also allow writing to the home directory.</p>
+</section>
+<section id="api" class="level2">
+<h2 class="anchored" data-anchor-id="api">API</h2>
+<section id="helpers" class="level3">
+<h3 class="anchored" data-anchor-id="helpers">Helpers</h3>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L19" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="run" class="level3">
+<h3 class="anchored" data-anchor-id="run">run</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    cmd, ignore_ex:<span class="bu">bool</span><span class="op">=</span><span class="va">False</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Run <code>cmd</code> in shell; return stdout (+ stderr if any); raise IOError on failure</em></p>
+<p>Executes a shell command and returns its combined stdout/stderr output. If <code>ignore_ex=True</code>, returns a tuple of <code>(returncode, output)</code> instead of raising on failure. This is the low-level execution function—it doesn’t do any safety checking.</p>
+<div id="1afff232" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> test_fail,test_eq</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="2d83cf61" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>test_eq(run(<span class="st">'echo hello'</span>), <span class="st">'hello'</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>test_eq(run(<span class="st">'echo out; echo err &gt;&amp;2'</span>), <span class="st">'out</span><span class="ch">\n</span><span class="st">err'</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>test_eq(run(<span class="st">'exit 1'</span>, ignore_ex<span class="op">=</span><span class="va">True</span>), (<span class="dv">1</span>, <span class="st">''</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>test_eq(run(<span class="st">'echo fail &gt;&amp;2; exit 1'</span>, ignore_ex<span class="op">=</span><span class="va">True</span>), (<span class="dv">1</span>,<span class="st">'fail'</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: run(<span class="st">'exit 1'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="command-specifications" class="level3">
+<h3 class="anchored" data-anchor-id="command-specifications">Command Specifications</h3>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L29" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="cmdspec" class="level3">
+<h3 class="anchored" data-anchor-id="cmdspec">CmdSpec</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> CmdSpec(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    name, <span class="co"># the command (str, will be split into tuple)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    denied:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># if set, these flags blocked</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    exec_flags:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># flags whose next arg is a command to validate</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    dest_flags:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># flags whose next arg is a destination to validate</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Base class for objects needing a basic <code>__repr__</code></em></p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#cmdspec"><code>CmdSpec</code></a> represents an allowed command with optional denied flags, exec flags, and dest flags. The <code>name</code> is stored as a tuple for prefix matching—so <code>CmdSpec('git log')</code> matches <code>git log</code>, <code>git log --oneline</code>, etc. The <code>denied</code> set contains flags that will cause the command to be rejected. The <code>exec_flags</code> set contains flags whose next argument is a command to validate recursively. The <code>dest_flags</code> set contains flags whose next argument is a destination to validate against allowed destinations.</p>
+<div id="d83e4a50" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>find <span class="op">=</span> CmdSpec(<span class="st">'find'</span>, denied<span class="op">=</span>[<span class="st">'-exec'</span>, <span class="st">'-delete'</span>])</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>find</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>find !{'-delete', '-exec'}</code></pre>
+</div>
+</div>
+<div id="e35b37cc" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> find([<span class="st">'find'</span>, <span class="st">'.'</span>, <span class="st">'-name'</span>, <span class="st">'*.py'</span>])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> find([<span class="st">'find'</span>, <span class="st">'.'</span>, <span class="st">'-exec'</span>, <span class="st">'rm'</span>])</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> find([<span class="st">'ls'</span>, <span class="st">'-la'</span>])</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Combined short flags should be caught</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>tar <span class="op">=</span> CmdSpec(<span class="st">'tar'</span>, denied<span class="op">=</span>[<span class="st">'-I'</span>, <span class="st">'--to-command'</span>])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> tar([<span class="st">'tar'</span>, <span class="st">'-xvf'</span>, <span class="st">'file.tar'</span>])      <span class="co"># allowed</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> tar([<span class="st">'tar'</span>, <span class="st">'-I'</span>, <span class="st">'zstd'</span>])        <span class="co"># exact match blocked</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> tar([<span class="st">'tar'</span>, <span class="st">'-xvfI'</span>, <span class="st">'zstd'</span>])     <span class="co"># combined flag blocked</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> tar([<span class="st">'tar'</span>, <span class="st">'--to-command=cat'</span>])  <span class="co"># long flag still works</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The <code>from_str</code> classmethod provides a compact string syntax for creating <a href="https://AnswerDotAI.github.io/safecmd/core.html#cmdspec"><code>CmdSpec</code></a> objects. The format is <code>command:-flag1|-flag2:exec=-exec|-execdir:dest=-o|--output</code> where colons separate sections:</p>
+<ul>
+<li>First section: command name (can be multi-word like <code>git log</code>)</li>
+<li>Denied flags section: <code>|-</code> separated flags to block (e.g., <code>-delete|-ok</code>)</li>
+<li>Exec flags section: <code>exec=</code> prefix, then <code>|</code>-separated flags whose next arg is a command to validate</li>
+<li>Dest flags section: <code>dest=</code> prefix, then <code>|</code>-separated flags whose next arg is a destination to validate</li>
+</ul>
+<p>For example, <code>CmdSpec.from_str('find:-delete:exec=-exec|-execdir')</code> creates a spec that allows <code>find</code>, blocks <code>-delete</code>, and validates the command after <code>-exec</code> or <code>-execdir</code>. If no special flags are needed, just pass the command name: <code>CmdSpec.from_str('cat')</code>.</p>
+<div id="80a601e1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>test_eq(CmdSpec.from_str(<span class="st">'cat'</span>), CmdSpec(<span class="st">'cat'</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>test_eq(CmdSpec.from_str(<span class="st">'find:-delete:exec=-exec|-execdir'</span>), CmdSpec(<span class="st">'find'</span>, denied<span class="op">=</span>[<span class="st">'-delete'</span>], exec_flags<span class="op">=</span>[<span class="st">'-exec'</span>, <span class="st">'-execdir'</span>]))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>test_eq(CmdSpec.from_str(<span class="st">'curl:dest=-o|--output'</span>), CmdSpec(<span class="st">'curl'</span>, dest_flags<span class="op">=</span>[<span class="st">'-o'</span>, <span class="st">'--output'</span>]))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>test_eq(CmdSpec.from_str(<span class="st">'git log'</span>), CmdSpec(<span class="st">'git log'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="default-allowlists" class="level3">
+<h3 class="anchored" data-anchor-id="default-allowlists">Default Allowlists</h3>
+<p>In the default configuration, <code>ok_dests</code> specifies where output redirects can write (default: <code>./, /tmp</code>). <code>ok_cmds</code> contains a generous set of read-only commands plus some safe git operations. Note that <code>find</code> blocks <code>-delete</code> but allows <code>-exec</code> with validation of the command argument:</p>
+<div id="af82b27d" class="cell">
+<details open="" class="code-fold">
+<summary>Exported source</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>default_cfg <span class="op">=</span> <span class="st">'''[DEFAULT]</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">ok_dests = ./, /tmp</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">ok_cmds = cat, head, tail, less, more, bat</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">    # Directory listing</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">    ls, tree, locate</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">    # Search</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">    grep, rg, ag, ack, fgrep, egrep</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="st">    # Text processing</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="st">    cut, sort, uniq, wc, tr, column</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="st">    # File info</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="st">    file, stat, du, df, which, whereis, type</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="st">    # Comparison</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="st">    diff, cmp, comm</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">    # Archives</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="st">    unzip, gunzip, bunzip2, unrar</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="st">    # Network</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="st">    ping, dig, nslookup, host</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="st">    # System info</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="st">    date, cal, uptime, whoami, hostname, uname, printenv</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="st">    # Utilities</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="st">    echo, printf, yes, seq, basename, dirname, realpath</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="st">    # Git (read-only)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="st">    git log, git show, git diff, git status, git branch, git tag, git remote,</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="st">    git stash list, git blame, git shortlog, git describe, git rev-parse,</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="st">    git ls-files, git ls-tree, git cat-file, git config --get, git config --list</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="st">    # Git (workspace)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="st">    git fetch, git add, git commit, git switch, git checkout</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="st">    # gh</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="st">    gh repo view, gh issue list, gh issue view, gh pr list, gh pr view, gh pr status, gh pr checks, gh pr diff</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="st">    gh release list, gh release view, gh run list, gh run view, gh workflow list, gh workflow view</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="st">    gh auth status, gh gist list, gh gist view, gh browse, gh search</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="st">    # nbdev</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="st">    nbdev_export, nbdev_clean</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="st">    # npm (read-only)</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="st">    npm list, npm ls, npm outdated, npm view, npm info, npm why, npm audit, npm config list, npm config get, npm search, npm pack</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="st">    # yarn (read-only)</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="st">    yarn list, yarn outdated, yarn why, yarn info, yarn config list, yarn config get</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="st">    # pnpm (read-only)</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="st">    pnpm list, pnpm ls, pnpm outdated, pnpm why, pnpm config list, pnpm config get</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="st">    # bun (read-only)</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="st">    bun pm ls, bun pm hash</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="st">    # js install</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="st">    npm install, yarn install, pnpm install, bun install</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="st">    # Modern Unix (read-only)</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="st">    bat, eza, exa, fd, fzf, dust, duf, tldr, zoxide, httpie, http, jq, yq</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="st">    # Docker (read-only)</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="st">    docker ps, docker images, docker logs, docker inspect, docker stats, docker top, docker diff, docker history, docker version, docker info</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="st">    # Docker (workspace - reversible)</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="st">    docker pull, docker build</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="st">    # AWS (read-only)</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="st">    aws s3 ls, aws s3 cp, aws sts get-caller-identity, aws iam get-user, aws iam list-users</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="st">    aws ec2 describe-instances, aws ec2 describe-vpcs, aws ec2 describe-security-groups</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="st">    aws logs describe-log-groups, aws logs filter-log-events, aws logs get-log-events</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="st">    aws lambda list-functions, aws lambda get-function</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="st">    aws cloudformation describe-stacks, aws cloudformation list-stacks</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="st">    aws rds describe-db-instances, aws dynamodb list-tables, aws dynamodb describe-table</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="st">    aws sqs list-queues, aws sns list-topics</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="st">    aws configure list, aws configure get</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="st">    # GCloud (read-only)</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud config list, gcloud config get-value, gcloud auth list</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud projects list, gcloud projects describe</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud compute instances list, gcloud compute instances describe, gcloud compute zones list, gcloud compute regions list</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud container clusters list, gcloud container clusters describe</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud functions list, gcloud functions describe, gcloud functions logs read</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud run services list, gcloud run services describe</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud sql instances list, gcloud sql instances describe</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud storage ls, gcloud storage cat</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="st">    gcloud logging read</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="st">    # toolslm</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="st">    folder2ctx, repo2ctx</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a><span class="st">    # Builtins</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a><span class="st">    cd, pwd, export, test, [, true, false</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="st">    # Exec/dest flag handling</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a><span class="st">    find:-delete|-ok|-okdir:exec=-exec|-execdir</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="st">    rg:--pre</span></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a><span class="st">    tar:--use-compress-program|--transform|--checkpoint-action|--info-script|--new-volume-script:exec=--to-command|-I</span></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a><span class="st">    curl:dest=-o|--output</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="76551b53" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg_path.unlink()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>If <code>config.ini</code> doesn’t exist, it’s created with the default configuration, in the file location following the XDG Base Directory spec.</p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L167" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_cfg" class="level3">
+<h3 class="anchored" data-anchor-id="parse_cfg">parse_cfg</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_cfg(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    cfg_str</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Parse config string, return (ok_dests set, ok_cmds set of CmdSpecs)</em></p>
+<p>The config is parsed into <code>ok_dests</code> and <code>ok_cmds</code>.</p>
+<div id="6ef5c0a3" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ok_dests)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(ok_cmds)[:<span class="dv">7</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'./', '/tmp'}</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>[gh browse, echo, test, git status, nbdev_clean, whereis, ag]</code></pre>
+</div>
+</div>
+<div id="7c15b2af" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>first(o <span class="cf">for</span> o <span class="kw">in</span> ok_cmds <span class="cf">if</span> <span class="bu">str</span>(o).startswith(<span class="st">'find'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>find !{'-ok', '-delete', '-okdir'} exec={'-execdir', '-exec'}</code></pre>
+</div>
+</div>
+</section>
+<section id="safe-execution" class="level3">
+<h3 class="anchored" data-anchor-id="safe-execution">Safe Execution</h3>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L181" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="validate_cmd" class="level3">
+<h3 class="anchored" data-anchor-id="validate_cmd">validate_cmd</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_cmd(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    toks, cmds:NoneType<span class="op">=</span><span class="va">None</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Check if toks matches an allowed command; returns False if denied flags present</em></p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#validate_cmd"><code>validate_cmd</code></a> checks whether a tokenized command matches any entry in the allowlist by calling each <a href="https://AnswerDotAI.github.io/safecmd/core.html#cmdspec"><code>CmdSpec</code></a> until one returns <code>True</code>.</p>
+<div id="0f84005a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_cmd([<span class="st">'ls'</span>, <span class="st">'-la'</span>])</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_cmd([<span class="st">'git'</span>, <span class="st">'status'</span>])</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_cmd([<span class="st">'find'</span>, <span class="st">'.'</span>, <span class="st">'-name'</span>, <span class="st">'*.py'</span>])</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_cmd([<span class="st">'find'</span>, <span class="st">'.'</span>, <span class="st">'-exec'</span>, <span class="st">'rm'</span>])  <span class="co"># -exec now handled by exec_flags, not denied</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_cmd([<span class="st">'find'</span>, <span class="st">'.'</span>, <span class="st">'-delete'</span>])  <span class="co"># -delete is still denied</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_cmd([<span class="st">'rm'</span>, <span class="st">'-rf'</span>, <span class="st">'/'</span>])</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_cmd([<span class="st">'git'</span>, <span class="st">'push'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L193" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="disalloweddest" class="level3">
+<h3 class="anchored" data-anchor-id="disalloweddest">DisallowedDest</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DisallowedDest(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    dest</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Not enough permissions.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L190" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="disallowedcmd" class="level3">
+<h3 class="anchored" data-anchor-id="disallowedcmd">DisallowedCmd</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DisallowedCmd(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    cmd</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Not enough permissions.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L187" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="disallowederror" class="level3">
+<h3 class="anchored" data-anchor-id="disallowederror">DisallowedError</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DisallowedError(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    args:VAR_POSITIONAL, kwargs:VAR_KEYWORD</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Not enough permissions.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L203" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="validate_dest" class="level3">
+<h3 class="anchored" data-anchor-id="validate_dest">validate_dest</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_dest(</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    dest, dests:NoneType<span class="op">=</span><span class="va">None</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Check if dest (resolved to absolute) matches an allowed destination pattern</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L197" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="normalize_dest" class="level3">
+<h3 class="anchored" data-anchor-id="normalize_dest">normalize_dest</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normalize_dest(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    dest</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Normalize destination to absolute path, expanding ~ and env vars</em></p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#normalize_dest"><code>normalize_dest</code></a> resolves paths to absolute, expanding <code>~</code> and environment variables (like <code>$HOME</code>) and normalizing <code>..</code> components. This prevents path traversal attacks where <code>./..</code> or <code>./subdir/../../escape</code> would otherwise match the <code>./</code> pattern. <a href="https://AnswerDotAI.github.io/safecmd/core.html#validate_dest"><code>validate_dest</code></a> checks if a resolved absolute path starts with any allowed pattern (also resolved to absolute).</p>
+<div id="g6jich08d5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>cwd <span class="op">=</span> os.getcwd()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>home <span class="op">=</span> os.path.expanduser(<span class="st">'~'</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>parent <span class="op">=</span> os.path.dirname(cwd)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># normalize_dest now returns absolute paths</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'file.txt'</span>), <span class="ss">f'</span><span class="sc">{</span>cwd<span class="sc">}</span><span class="ss">/file.txt'</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'./file.txt'</span>), <span class="ss">f'</span><span class="sc">{</span>cwd<span class="sc">}</span><span class="ss">/file.txt'</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'/tmp/file'</span>), <span class="st">'/tmp/file'</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'../up.txt'</span>), <span class="ss">f'</span><span class="sc">{</span>parent<span class="sc">}</span><span class="ss">/up.txt'</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'~/home.txt'</span>), <span class="ss">f'</span><span class="sc">{</span>home<span class="sc">}</span><span class="ss">/home.txt'</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>test_eq(normalize_dest(<span class="st">'$HOME/file'</span>), <span class="ss">f'</span><span class="sc">{</span>home<span class="sc">}</span><span class="ss">/file'</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># With default ok_dests = {'./', '/tmp'}</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_dest(<span class="st">'file.txt'</span>)       <span class="co"># /cwd/file.txt matches /cwd/</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_dest(<span class="st">'./subdir/f.txt'</span>) <span class="co"># /cwd/subdir/f.txt matches /cwd/</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> validate_dest(<span class="st">'/tmp/test'</span>)      <span class="co"># matches /tmp</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_dest(<span class="st">'/etc/passwd'</span>)  <span class="co"># no match</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_dest(<span class="st">'../up.txt'</span>)    <span class="co"># resolves outside cwd - blocked!</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> validate_dest(<span class="st">'~/file'</span>)       <span class="co"># ~/ not in defaults</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#validate"><code>validate</code></a> checks a bash command string against the allowlists without executing it. This is useful for pre-validation (e.g., in hooks or UI) where you want to know if a command <em>would</em> be allowed before actually running it. It raises <a href="https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd"><code>DisallowedCmd</code></a> or <a href="https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest"><code>DisallowedDest</code></a> if validation fails.</p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L222" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="validate" class="level3">
+<h3 class="anchored" data-anchor-id="validate">validate</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    cmd:<span class="bu">str</span>, <span class="co"># Bash command string to validate</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    cmds:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed commands set; defaults to ok_cmds</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    dests:NoneType<span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed destinations set; defaults to ok_dests</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Validate <code>cmd</code> against allowlists; raises DisallowedCmd or DisallowedDest on failure</em></p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#_build_flag_dicts"><code>_build_flag_dicts</code></a> extracts <code>exec_flags</code> and <code>dest_flags</code> dicts from a set of <a href="https://AnswerDotAI.github.io/safecmd/core.html#cmdspec"><code>CmdSpec</code></a> objects. Each dict maps command names to their respective flag sets, which are then passed to <a href="https://AnswerDotAI.github.io/safecmd/bashxtract.html#extract_commands"><code>extract_commands</code></a> for recursive validation.</p>
+<div id="8wacpc9bna" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Safe commands pass validation silently</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'ls -la | grep py'</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'git status &amp;&amp; echo done'</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'echo hi &gt; file.txt'</span>)  <span class="co"># allowed - writes to ./file.txt</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'cat data &gt; /tmp/out'</span>)  <span class="co"># allowed - /tmp is ok</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Unsafe commands raise exceptions</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'rm -rf /'</span>), exc<span class="op">=</span>DisallowedCmd)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo hi &gt; /etc/badplace'</span>), exc<span class="op">=</span>DisallowedDest)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'ls $(rm -rf /)'</span>), exc<span class="op">=</span>DisallowedCmd)  <span class="co"># nested command caught</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo &gt; ../escape.txt'</span>), exc<span class="op">=</span>DisallowedDest)  <span class="co"># parent dir not allowed</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Path traversal attacks - must be blocked</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo hi &gt; ./..'</span>), exc<span class="op">=</span>DisallowedDest)  <span class="co"># escapes via ./..</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo hi &gt; ./../escape.txt'</span>), exc<span class="op">=</span>DisallowedDest)  <span class="co"># escapes via ./../</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo hi &gt; ./subdir/../../escape.txt'</span>), exc<span class="op">=</span>DisallowedDest)  <span class="co"># nested escape</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'echo hi &gt; /tmp/../bad.txt'</span>), exc<span class="op">=</span>DisallowedDest)  <span class="co"># escape via /tmp/../</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Resolved paths that stay within allowed dirs should work</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'echo hi &gt; ./subdir/../file.txt'</span>)  <span class="co"># resolves to ./file.txt, still in cwd</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="2995ac04" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exec_flags: find -exec with allowed command passes, with disallowed command fails</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'find . -exec ls'</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'find . -exec rm'</span>), exc<span class="op">=</span>DisallowedCmd)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co"># dest_flags: curl -o with allowed dest passes, with disallowed dest fails</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>validate(<span class="st">'curl -o /tmp/out http://example.com'</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: validate(<span class="st">'curl -o /etc/passwd http://example.com'</span>), exc<span class="op">=</span>DisallowedDest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L238" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="safe_run" class="level3">
+<h3 class="anchored" data-anchor-id="safe_run">safe_run</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> safe_run(</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    cmd:<span class="bu">str</span>, <span class="co"># Bash command string to execute</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed commands (comma-separated, config format); defaults to ok_cmds</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed destinations (comma-separated); defaults to ok_dests</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    add_cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp add these commands</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    add_dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp add these destinations</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    rm_cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these commands</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    rm_dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these destinations</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    ignore_ex:<span class="bu">bool</span><span class="op">=</span><span class="va">False</span>, <span class="co"># If True, return (returncode, output) instead of raising on error</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>: <span class="co"># Combined stdout/stderr output</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Run <code>cmd</code> in shell if all commands and destinations are in allowlists, else raise</em></p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run</code></a> is the main entry point. It parses the bash command, validates all extracted commands and redirect destinations against the allowlists, and only executes if everything passes. <a href="https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd"><code>DisallowedCmd</code></a> and <a href="https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest"><code>DisallowedDest</code></a> are raised for violations, giving clear error messages about what was blocked.</p>
+<div id="e76f3b5f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>test_eq(safe_run(<span class="st">'ls'</span>), run(<span class="st">'ls'</span>))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>test_eq(safe_run(<span class="st">'echo hello | cat'</span>), <span class="st">'hello'</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>test_eq(safe_run(<span class="st">'[ -f /etc/passwd ] &amp;&amp; echo exists'</span>), <span class="st">'exists'</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'00_bashxtract.ipynb'</span> <span class="kw">in</span> safe_run(<span class="st">'find . -exec ls </span><span class="er">\</span><span class="st">;'</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Redirects to allowed destinations work</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>safe_run(<span class="st">'echo test &gt; /tmp/safecmd_test_xyz'</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>safe_run(<span class="st">'echo test &gt; test_file_xyz.txt'</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: safe_run(<span class="vs">r'env rm -rf asdfff'</span>), exc<span class="op">=</span>DisallowedCmd)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: safe_run(<span class="st">'echo hi &gt; /badpath/file'</span>), exc<span class="op">=</span>DisallowedDest)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>test_fail(<span class="kw">lambda</span>: safe_run(<span class="st">'find . -exec sudo ls </span><span class="er">\</span><span class="st">;'</span>), exc<span class="op">=</span>DisallowedCmd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Pass <code>ignore_ex=True</code> to return a tuple of <code>return_code,result</code> instead of raising on error on command failed. (Permission failures still raise an error however.)</p>
+<div id="6741fdfb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>safe_run(<span class="st">'cat /nonexistent_xyz123 2&gt;&amp;1'</span>, ignore_ex<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>(1, 'cat: /nonexistent_xyz123: No such file or directory')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="bash-tool" class="level2">
+<h2 class="anchored" data-anchor-id="bash-tool">Bash tool</h2>
+<p>In Solveit, any function with types and a docstring can be used as a tool. Instead of raising an exception, it’s best to return a success/error dict. The functions in this section wrap <a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run</code></a> in this way, and provide documentation suitable for an LLM.</p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L261" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="bash" class="level3">
+<h3 class="anchored" data-anchor-id="bash">bash</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bash(</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    cmd:<span class="bu">str</span>, <span class="co"># Bash command string to execute - all shell features like pipes and subcommands are supported</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    rm_cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these commands from allow list</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    rm_dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these destinations from allow list</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Run a bash shell command line safely and return the concatencated stdout and stderr.</em> <code>cmd</code> is parsed and all calls are checked against an allow-list. If the command is not allowed, STOP and inform the user of the command run and error details; so they can decide whether to whitelist it or run it themselves. The default allow-list includes most standard unix commands and git subcommands that do not change state or are easily reverted. All operators are supported. Output redirects are validated against allowed destinations (default: ./ and /tmp). rm_ params are comma-separated strs.</p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#bash"><code>bash</code></a> does not surface any parameters that could allow the LLM to add or change the allowed tool list.</p>
+<div id="0aeddc9f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>bash(<span class="st">'ls | head -2'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'success': '_quarto.yml\n00_bashxtract.ipynb'}</code></pre>
+</div>
+</div>
+<div id="1795efea" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>bash(<span class="st">'ls | head -2'</span>, rm_cmds<span class="op">=</span><span class="st">'head'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'error': DisallowedCmd('head -2')}</code></pre>
+</div>
+</div>
+<div id="b60a3476" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>bash(<span class="st">'sudo ls'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'error': DisallowedCmd('sudo ls')}</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L277" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="unsafe_bash" class="level3">
+<h3 class="anchored" data-anchor-id="unsafe_bash">unsafe_bash</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> unsafe_bash(</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    cmd:<span class="bu">str</span>, <span class="co"># Bash command string to execute - all shell features like pipes and subcommands are supported</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed commands; defaults to ok_cmds; DO NOT USE without upfront user permission</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Allowed destinations; defaults to ok_dests; DO NOT USE without upfront user permission</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    add_cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp add these commands to allow list; DO NOT USE without upfront user permission</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    add_dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp add these destinations to allow list; DO NOT USE without upfront user permission</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    rm_cmds:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these commands from allow list</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    rm_dests:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="co"># Temp remove these destinations from allow list</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Run a bash shell command line safely and return the output. <code>cmd</code> is parsed and all calls are checked against an allow-list.</em> If the command is not allowed, STOP and inform the user of the command run and error details; so they can decide whether to whitelist it or run it themselves. The default allow-list includes most standard unix commands and git subcommands that do not change state or are easily reverted. All operators are supported. Output redirects are validated against allowed destinations. cmds/dests and add_/rm_ params are comma-separated strs.</p>
+<p><a href="https://AnswerDotAI.github.io/safecmd/core.html#unsafe_bash"><code>unsafe_bash</code></a> is like <a href="https://AnswerDotAI.github.io/safecmd/core.html#bash"><code>bash</code></a> but exposes parameters to modify the allowlists. The <code>add_cmds</code> and <code>add_dests</code> parameters let an LLM temporarily expand what’s allowed—use with caution, and only with explicit user permission. This is useful when you trust the LLM to make safe expansions in specific contexts.</p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L308" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rm_allowed_dests" class="level3">
+<h3 class="anchored" data-anchor-id="rm_allowed_dests">rm_allowed_dests</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rm_allowed_dests(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    dests</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Remove comma-separated <code>dests</code> from the allow list</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L304" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rm_allowed_cmds" class="level3">
+<h3 class="anchored" data-anchor-id="rm_allowed_cmds">rm_allowed_cmds</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rm_allowed_cmds(</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    cmds:<span class="bu">str</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Remove comma-separated <code>cmds</code> from the allow list</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L300" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="add_allowed_dests" class="level3">
+<h3 class="anchored" data-anchor-id="add_allowed_dests">add_allowed_dests</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_allowed_dests(</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    dests</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Add comma-separated <code>dests</code> to the allow list; (this can not be used as an LLM tool)</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L296" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="add_allowed_cmds" class="level3">
+<h3 class="anchored" data-anchor-id="add_allowed_cmds">add_allowed_cmds</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_allowed_cmds(</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    cmds</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Add comma-separated <code>cmds</code> to the allow list; (this can not be used as an LLM tool)</em></p>
+<p>These functions modify the global <code>ok_cmds</code> and <code>ok_dests</code> sets at runtime. <a href="https://AnswerDotAI.github.io/safecmd/core.html#add_allowed_cmds"><code>add_allowed_cmds</code></a> and <a href="https://AnswerDotAI.github.io/safecmd/core.html#add_allowed_dests"><code>add_allowed_dests</code></a> expand the allowlist, while <a href="https://AnswerDotAI.github.io/safecmd/core.html#rm_allowed_cmds"><code>rm_allowed_cmds</code></a> and <a href="https://AnswerDotAI.github.io/safecmd/core.html#rm_allowed_dests"><code>rm_allowed_dests</code></a> restrict it. The <code>add_</code> functions are intentionally not exposed as LLM tools to prevent an LLM from expanding its own permissions.</p>
+<div id="3cfe7f29" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>rm_allowed_cmds(<span class="st">'ls'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="d53a1a87" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>bash(<span class="st">'ls -l'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'error': DisallowedCmd('ls -l')}</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="cli" class="level2">
+<h2 class="anchored" data-anchor-id="cli">CLI</h2>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/safecmd/blob/main/safecmd/core.py#L316" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="main" class="level3">
+<h3 class="anchored" data-anchor-id="main">main</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The CLI provides a simple command-line interface to <a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run</code></a>.</p>
+<p>Usage:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="ex">safecmd</span> ls <span class="at">-la</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If you have pipes etc, you’ll need to quote the whole command:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="ex">safecmd</span> <span class="st">'ls -la | grep py'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The command and all its arguments are joined back into a single string and passed to <a href="https://AnswerDotAI.github.io/safecmd/core.html#safe_run"><code>safe_run</code></a>, which validates against the allowlist before execution. If the command isn’t allowed, it shows an error and returns exit code of <code>1</code>.</p>
+<p>This lets you use safecmd as a drop-in replacement for running untrusted commands from scripts or other tools: anything not in the allowlist is blocked before execution.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/safecmd");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/safecmd/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

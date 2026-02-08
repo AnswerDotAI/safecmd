@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.2
+
+### New Features
+
+- Add positional exec/dest arg validation and ex tool ([#8](https://github.com/AnswerDotAI/safecmd/issues/8))
+
+
 ## 0.1.1
 
 ### Bugs Squashed

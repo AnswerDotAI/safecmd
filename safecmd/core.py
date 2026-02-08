@@ -5,10 +5,10 @@
 # %% auto #0
 __all__ = ['default_cfg', 'cfg_path', 'ok_dests', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedError',
            'DisallowedCmd', 'DisallowedDest', 'normalize_dest', 'validate_dest', 'validate', 'safe_run', 'bash',
-           'unsafe_bash', 'add_allowed_cmds', 'add_allowed_dests', 'rm_allowed_cmds', 'rm_allowed_dests', 'main']
+           'unsafe_bash', 'add_allowed_cmds', 'add_allowed_dests', 'rm_allowed_cmds', 'rm_allowed_dests', 'ex', 'main']
 
 # %% ../nbs/01_core.ipynb #7e9a179e
-import subprocess,json,shutil,os
+import subprocess,json,shutil,os,shlex
 from fastcore.utils import *
 from fastcore.xdg import xdg_config_home
 from configparser import ConfigParser
@@ -16,14 +16,20 @@ from configparser import ConfigParser
 from .bashxtract import *
 
 # %% ../nbs/01_core.ipynb #2da56009
-def run(cmd, ignore_ex=False):
+def run(cmd, ignore_ex=False, split=False):
     "Run `cmd` in shell; return stdout (+ stderr if any); raise IOError on failure"
     res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    if split:
+        out,err = res.stdout.strip(), res.stderr.strip()
+        if ignore_ex: return (res.returncode, out, err)
+        if res.returncode: raise IOError(err or out)
+        return (out, err)
     out = res.stdout.strip()
     if res.stderr: out += ('\n' if out else '') + res.stderr.strip()
     if ignore_ex: return (res.returncode, out)
     if res.returncode: raise IOError(out)
     return out
+
 
 # %% ../nbs/01_core.ipynb #a7683b2a
 class CmdSpec(BasicRepr):
@@ -31,21 +37,35 @@ class CmdSpec(BasicRepr):
         name,  # the command (str, will be split into tuple)
         denied=None,  # if set, these flags blocked
         exec_flags=None,  # flags whose next arg is a command to validate
-        dest_flags=None   # flags whose next arg is a destination to validate
+        dest_flags=None,  # flags whose next arg is a destination to validate
+        exec_pos=None,  # positional arg indices (0-based) that are commands to validate
+        dest_pos=None   # positional arg indices (0-based) that are destinations to validate
     ):
         self.name = tuple(name.split())
         self.denied,self.exec_flags,self.dest_flags = set(denied or []),set(exec_flags or []),set(dest_flags or [])
+        self.exec_pos,self.dest_pos = set(exec_pos or []),set(dest_pos or [])
+
+    @classmethod
+    def _split_pos(cls, vals):
+        "Split list of values into (flags, positions) where $N entries become int positions"
+        flags,pos = [],[]
+        for v in vals:
+            if v.startswith('$'): pos.append(int(v[1:]))
+            else: flags.append(v)
+        return flags, pos
 
     @classmethod
     def from_str(cls, s):
-        "Create from 'cmd:-flag1|-flag2:exec=-exec|-execdir:dest=-o|--output' format"
+        "Create from 'cmd:-flag1|-flag2:exec=-exec|$0:dest=-o|$-1' format"
         parts = s.split(':')
-        name,denied,exec_flags,dest_flags = parts[0],None,None,None
+        name,denied,exec_flags,dest_flags,exec_pos,dest_pos = parts[0],None,None,None,None,None
         for p in parts[1:]:
-            if p.startswith('exec='): exec_flags = p[5:].split('|')
-            elif p.startswith('dest='): dest_flags = p[5:].split('|')
+            if p.startswith('exec='):
+                exec_flags, exec_pos = cls._split_pos(p[5:].split('|'))
+            elif p.startswith('dest='):
+                dest_flags, dest_pos = cls._split_pos(p[5:].split('|'))
             else: denied = p.split('|') if p else None
-        return cls(name, denied, exec_flags, dest_flags)
+        return cls(name, denied, exec_flags, dest_flags, exec_pos, dest_pos)
         
     def __hash__(self): return hash(self.name)
     def __eq__(self, b): return self.name==b.name
@@ -54,7 +74,9 @@ class CmdSpec(BasicRepr):
         s = ' '.join(self.name)
         if self.denied: s += f' !{self.denied}'
         if self.exec_flags: s += f' exec={self.exec_flags}'
+        if self.exec_pos: s += f' exec_pos={self.exec_pos}'
         if self.dest_flags: s += f' dest={self.dest_flags}'
+        if self.dest_pos: s += f' dest_pos={self.dest_pos}'
         return s
     
     def __call__(self, toks):
@@ -69,6 +91,7 @@ class CmdSpec(BasicRepr):
                 for tok in toks:
                     if tok.startswith('-') and not tok.startswith('--') and d[1] in tok[1:]: return False
         return True
+
 
 # %% ../nbs/01_core.ipynb #af82b27d
 default_cfg = '''[DEFAULT]
@@ -142,14 +165,18 @@ ok_cmds = cat, head, tail, less, more, bat
     gcloud logging read
     # toolslm
     folder2ctx, repo2ctx
-    # Builtins
-    cd, pwd, export, test, [, true, false
+    # Positional exec/dest handling
+    env:exec=$0, xargs:exec=$0
+    tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1
     # Exec/dest flag handling
     find:-delete|-ok|-okdir:exec=-exec|-execdir
     rg:--pre
     tar:--use-compress-program|--transform|--checkpoint-action|--info-script|--new-volume-script:exec=--to-command|-I
     curl:dest=-o|--output
+    # Builtins
+    cd, pwd, export, test, [, true, false
 '''
+
 
 # %% ../nbs/01_core.ipynb #926cefa7
 cfg_path = xdg_config_home() / 'safecmd' / 'config.ini'
@@ -211,13 +238,15 @@ def validate_dest(dest, dests=None):
 
 # %% ../nbs/01_core.ipynb #892pxeqemg6
 def _build_flag_dicts(cmds):
-    "Build exec_flags and dest_flags dicts from CmdSpec set"
-    exec_flags,dest_flags = {},{}
+    "Build exec_flags, dest_flags, exec_pos, dest_pos dicts from CmdSpec set"
+    exec_flags,dest_flags,exec_pos,dest_pos = {},{},{},{}
     for spec in cmds:
         name = spec.name[0] if len(spec.name) == 1 else ' '.join(spec.name)
         if spec.exec_flags: exec_flags[name] = spec.exec_flags
         if spec.dest_flags: dest_flags[name] = spec.dest_flags
-    return exec_flags, dest_flags
+        if spec.exec_pos: exec_pos[name] = spec.exec_pos
+        if spec.dest_pos: dest_pos[name] = spec.dest_pos
+    return exec_flags, dest_flags, exec_pos, dest_pos
 
 def validate(
     cmd:str,  # Bash command string to validate
@@ -227,12 +256,13 @@ def validate(
     "Validate `cmd` against allowlists; raises DisallowedCmd or DisallowedDest on failure"
     if cmds is None: cmds = ok_cmds
     if dests is None: dests = ok_dests
-    exec_flags, dest_flags = _build_flag_dicts(cmds)
-    commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags)
+    exec_flags, dest_flags, exec_pos, dest_pos = _build_flag_dicts(cmds)
+    commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags, dest_pos=dest_pos, exec_pos=exec_pos)
     for c in commands:
         if not validate_cmd(c, cmds): raise DisallowedCmd(c)
     for op, dest in redirects:
         if not validate_dest(dest, dests): raise DisallowedDest(dest)
+
 
 # %% ../nbs/01_core.ipynb #a9de4db3
 def safe_run(
@@ -244,6 +274,7 @@ def safe_run(
     rm_cmds:str=None,  # Temp remove these commands
     rm_dests:str=None,  # Temp remove these destinations
     ignore_ex:bool=False,  # If True, return (returncode, output) instead of raising on error
+    split:bool=False,  # If True, return stdout and stderr separately
 ) -> str:  # Combined stdout/stderr output
     "Run `cmd` in shell if all commands and destinations are in allowlists, else raise"
     eff_dests = _split_set(dests) if dests else ok_dests.copy()
@@ -255,7 +286,7 @@ def safe_run(
     eff_cmds -= {CmdSpec(c) for c in _split_set(rm_cmds)}
     
     validate(cmd, eff_cmds, eff_dests)
-    return run(cmd, ignore_ex=ignore_ex)
+    return run(cmd, ignore_ex=ignore_ex, split=split)
 
 # %% ../nbs/01_core.ipynb #28df0b13
 def bash(
@@ -308,6 +339,21 @@ def rm_allowed_cmds(cmds:str):
 def rm_allowed_dests(dests):
     "Remove comma-separated `dests` from the allow list"
     ok_dests.difference_update(_split_set(dests))
+
+# %% ../nbs/01_core.ipynb #e03a70e1
+def ex(
+    path:str, # The file to run `ex` on
+    cmds:str # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
+):
+    """Run ex commands on a file via bash.
+    TIP: Great for in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
+    But for inserting/deleting/replacing lines/strs, use the dedicated tools where possible."""
+    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\n{cmds}\nx\nEX_EOF"
+    rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
+    err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
+    errs = [l for l in err_lines if l[:1]=='E' and l[1:2].isdigit()]
+    if errs: return {'error': '\n'.join(errs)}
+    return {'success': out.splitlines()+err_lines[-1:] or f'Applied to {path}'}
 
 # %% ../nbs/01_core.ipynb #2140f5e2
 import argparse,sys

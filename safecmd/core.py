@@ -264,7 +264,18 @@ def validate(
         if not validate_dest(dest, dests): raise DisallowedDest(dest)
 
 
-# %% ../nbs/01_core.ipynb #a9de4db3
+# %% ../nbs/01_core.ipynb #41476e4f
+def _eff_sets(cmds=None, dests=None, add_cmds=None, add_dests=None, rm_cmds=None, rm_dests=None):
+    "Compute effective cmd specs and dest sets from defaults + overrides"
+    eff_dests = _split_set(dests) if dests else ok_dests.copy()
+    eff_cmds = _split_specs(cmds) if cmds else ok_cmds.copy()
+    eff_dests |= _split_set(add_dests)
+    eff_dests -= _split_set(rm_dests)
+    eff_cmds |= _split_specs(add_cmds)
+    eff_cmds -= {CmdSpec(c) for c in _split_set(rm_cmds)}
+    return eff_cmds, eff_dests
+
+# %% ../nbs/01_core.ipynb #1522b1d5
 def safe_run(
     cmd:str,  # Bash command string to execute
     cmds:str=None,  # Allowed commands (comma-separated, config format); defaults to ok_cmds
@@ -277,14 +288,7 @@ def safe_run(
     split:bool=False,  # If True, return stdout and stderr separately
 ) -> str:  # Combined stdout/stderr output
     "Run `cmd` in shell if all commands and destinations are in allowlists, else raise"
-    eff_dests = _split_set(dests) if dests else ok_dests.copy()
-    eff_cmds = _split_specs(cmds) if cmds else ok_cmds.copy()
-    
-    eff_dests |= _split_set(add_dests)
-    eff_dests -= _split_set(rm_dests)
-    eff_cmds |= _split_specs(add_cmds)
-    eff_cmds -= {CmdSpec(c) for c in _split_set(rm_cmds)}
-    
+    eff_cmds, eff_dests = _eff_sets(cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests)
     validate(cmd, eff_cmds, eff_dests)
     return run(cmd, ignore_ex=ignore_ex, split=split)
 
@@ -302,7 +306,12 @@ def bash(
     All operators are supported. Output redirects are validated against allowed destinations (default: ./ and /tmp).
     rm_ params are comma-separated strs."""
     try: return {'success': safe_run(cmd, rm_cmds=rm_cmds, rm_dests=rm_dests)}
-    except PermissionError as e: return {'error': e}
+    except PermissionError as e:
+        eff_cmds, eff_dests = _eff_sets(rm_cmds=rm_cmds, rm_dests=rm_dests)
+        return {'error': e,
+            'allowed_cmds' : joins('; ' ,eff_cmds ),
+            'allowed_dests': joins('; ' ,eff_dests),
+            'suggestion': 'rerun using an allowed tool/dest, or ask user to provide permission'}
 
 # %% ../nbs/01_core.ipynb #1ed78ed3
 def unsafe_bash(

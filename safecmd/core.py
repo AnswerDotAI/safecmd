@@ -95,7 +95,7 @@ class CmdSpec(BasicRepr):
 
 # %% ../nbs/01_core.ipynb #af82b27d
 default_cfg = '''[DEFAULT]
-ok_dests = ./, /tmp
+ok_dests = ./, /dev/null, /tmp
 
 ok_cmds = cat, head, tail, less, more, bat
     # Directory listing

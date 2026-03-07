@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.3
+
+### New Features
+
+- Add /dev/null ([#10](https://github.com/AnswerDotAI/safecmd/issues/10))
+
+
 ## 0.1.2
 
 ### New Features

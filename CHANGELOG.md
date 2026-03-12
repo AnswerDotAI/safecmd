@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.4
+
+### New Features
+
+- Use `set noai` ([#11](https://github.com/AnswerDotAI/safecmd/issues/11))
+
+
 ## 0.1.3
 
 ### New Features

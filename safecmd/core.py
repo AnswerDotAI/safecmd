@@ -359,7 +359,7 @@ def ex(
     Remember: e.g 267,268j means "run j on each line in the range", so it joins 267→268, then joins what's now 268 (the old 269) too.
     - 267j wil just join 267 with the next line.
     NB: for inserting/deleting/replacing lines/strs, use the dedicated tools like `str_replace`, not ex, where possible."""
-    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\n{cmds}\nx\nEX_EOF"
+    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\n{cmds}\nx\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
     err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
     errs = [l for l in err_lines if l[:1]=='E' and l[1:2].isdigit()]

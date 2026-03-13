@@ -354,7 +354,7 @@ def ex(
     path:str, # The file to run `ex` on
     cmds:str # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
 ):
-    """Run ex commands on a file via bash.
+    """Run ex commands on a file via bash. Always runs in `set noai` mode.
     TIP: Great for in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
     NB: for inserting/deleting/replacing lines/strs, use the dedicated tools like `str_replace`, not ex, where possible."""
     cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\n{cmds}\nx\nEX_EOF"

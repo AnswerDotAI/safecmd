@@ -117,9 +117,9 @@ ok_cmds = cat, head, tail, less, more, bat
     # Utilities
     echo, printf, yes, seq, basename, dirname, realpath
     # Git (read-only)
-    git log, git show, git diff, git status, git branch, git tag, git remote,
-    git stash list, git blame, git shortlog, git describe, git rev-parse,
-    git ls-files, git ls-tree, git cat-file, git config --get, git config --list
+    git blame, git branch, git cat-file, git config --get, git config --list,
+    git describe, git diff, git log, git ls-files, git ls-tree, git merge-base,
+    git remote, git rev-parse, git shortlog, git show, git stash list, git status, git tag
     # Git (workspace)
     git fetch, git add, git commit, git switch, git checkout
     # gh
@@ -176,7 +176,6 @@ ok_cmds = cat, head, tail, less, more, bat
     # Builtins
     cd, pwd, export, test, [, true, false
 '''
-
 
 # %% ../nbs/01_core.ipynb #926cefa7
 cfg_path = xdg_config_home() / 'safecmd' / 'config.ini'

@@ -356,8 +356,6 @@ def ex(
 ):
     """Run ex commands on a file via bash.
     TIP: Great for in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
-    Remember: e.g 267,268j means "run j on each line in the range", so it joins 267→268, then joins what's now 268 (the old 269) too.
-    - 267j wil just join 267 with the next line.
     NB: for inserting/deleting/replacing lines/strs, use the dedicated tools like `str_replace`, not ex, where possible."""
     cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\n{cmds}\nx\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)

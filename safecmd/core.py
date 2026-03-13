@@ -352,12 +352,13 @@ def rm_allowed_dests(dests):
 # %% ../nbs/01_core.ipynb #e03a70e1
 def ex(
     path:str, # The file to run `ex` on
-    cmds:str # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
+    cmds:str, # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
+    sw:int=4  # shiftwidth for in/dedent commands
 ):
-    """Run ex commands on a file via bash. Always runs in `set noai` mode.
+    """Run ex commands on a file via bash. Always runs in `noai` and `et` mode.
     TIP: Great for in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
     NB: for inserting/deleting/replacing lines/strs, use the dedicated tools like `str_replace`, not ex, where possible."""
-    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\n{cmds}\nx\nEX_EOF"
+    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\nset et\nset sw={sw}\n{cmds}\nx\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
     err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
     errs = [l for l in err_lines if l[:1]=='E' and l[1:2].isdigit()]

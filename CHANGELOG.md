@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.5
+
+### New Features
+
+- Add shiftwidth param and expandtab mode to ex command ([#13](https://github.com/AnswerDotAI/safecmd/issues/13))
+
+
 ## 0.1.4
 
 ### New Features

@@ -118,11 +118,11 @@ def scan_flag_args(commands, exec_flags=None, dest_flags=None, dest_pos=None, ex
         if cmd_name in exec_pos:
             for idx in exec_pos[cmd_name]:
                 try: extra_cmds.append(args[idx])
-                except IndexError as e: print('exec pos not found', idx)
+                except IndexError as e: pass
         if cmd_name in dest_pos:
             for idx in dest_pos[cmd_name]:
                 try: extra_dests.append((idx, args[idx]))
-                except IndexError as e: print('dest pos not found', idx)
+                except IndexError as e: pass
     
     return extra_cmds, extra_dests
 

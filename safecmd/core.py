@@ -27,7 +27,7 @@ def run(cmd, ignore_ex=False, split=False):
         if res.returncode: raise IOError(err or out)
         return (out, err)
     out = res.stdout
-    if res.stderr: out += ('\n' if out else '') + res.stderr
+    if res.stderr: out += res.stderr
     if ignore_ex: return (res.returncode, out)
     if res.returncode: raise IOError(out)
     return out
@@ -169,7 +169,7 @@ ok_cmds = cat, head, tail, less, more, bat
     folder2ctx, repo2ctx
     # Positional exec/dest handling
     env:exec=$0, xargs:exec=$0
-    tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1
+    tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1, mkdir:dest=$-1
     # Exec/dest flag handling
     find:-delete|-ok|-okdir:exec=-exec|-execdir
     rg:--pre
@@ -250,6 +250,20 @@ def _build_flag_dicts(cmds):
         if spec.dest_pos: dest_pos[name] = spec.dest_pos
     return exec_flags, dest_flags, exec_pos, dest_pos
 
+def _spec_for(toks, cmds):
+    "Find matching CmdSpec for command tokens"
+    return first(s for s in cmds if s(toks))
+
+def _validate_dest_args(toks, cmds, dests):
+    "Raise if command has dest requirements that can't be resolved"
+    spec = _spec_for(toks, cmds)
+    if not spec: return
+    args = list(toks[len(spec.name):])
+    for pos in spec.dest_pos:
+        try: d = args[pos]
+        except IndexError: raise DisallowedCmd(toks) from None
+        if not validate_dest(d, dests): raise DisallowedDest(d)
+
 def validate(
     cmd:str,  # Bash command string to validate
     cmds=None,  # Allowed commands set; defaults to ok_cmds
@@ -262,6 +276,7 @@ def validate(
     commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags, dest_pos=dest_pos, exec_pos=exec_pos)
     for c in commands:
         if not validate_cmd(c, cmds): raise DisallowedCmd(c)
+    for c in commands: _validate_dest_args(c, cmds, dests)
     for op, dest in redirects:
         if not validate_dest(dest, dests): raise DisallowedDest(dest)
 
@@ -297,6 +312,7 @@ def safe_run(
 # %% ../nbs/01_core.ipynb #28df0b13
 def bash(
     cmd:str,  # Bash command string to execute - all shell features like pipes and subcommands are supported
+    as_dict:bool=False, # Return a dict response with 'success' or 'error' key
     rm_cmds:str=None,  # Temp remove these commands from allow list
     rm_dests:str=None  # Temp remove these destinations from allow list
 ): # dict with 'success' or 'error' key; value is stdout+stderr for success, or error message otherwise
@@ -308,13 +324,14 @@ def bash(
     The default allow-list includes most standard unix commands and git subcommands that do not change state or are easily reverted.
     All operators are supported. Output redirects are validated against allowed destinations (default: ./ and /tmp).
     rm_ params are comma-separated strs."""
-    try: return {'success': safe_run(cmd, rm_cmds=rm_cmds, rm_dests=rm_dests)}
+    try: res = safe_run(cmd, rm_cmds=rm_cmds, rm_dests=rm_dests)
     except PermissionError as e:
         eff_cmds, eff_dests = _eff_sets(rm_cmds=rm_cmds, rm_dests=rm_dests)
         return {'error': e,
             'allowed_cmds' : joins('; ' ,eff_cmds ),
             'allowed_dests': joins('; ' ,eff_dests),
             'suggestion': 'rerun using an allowed tool/dest, or ask user to provide permission'}
+    return {'success': res} if as_dict else res
 
 # %% ../nbs/01_core.ipynb #1ed78ed3
 def unsafe_bash(
@@ -362,16 +379,18 @@ def ex(
 ):
     """Run ex commands on a file via bash. Always runs in `noai` and `et` mode.
     Use `ex(path, linenums=True)` (i.e no cmds) to get an initial file listing with line numbers.
-    TIP: Commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc."""
-    if linenums: cmds += '\n%#'
-    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\nset et\nset sw={sw}\n{cmds}\nx\nEX_EOF"
+    Can also be used to create new files (use `a` with a non-existent path).
+    ex commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc."""
+    cmds = cmds.strip()
+    if linenums: cmds = (cmds + '\n' if cmds else '') + '%#'
+    if cmds: cmds += '\n'
+    cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\nset et\nset sw={sw}\n{cmds}x\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
     err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
     errs = '\n'.join(l for l in err_lines if l[:1]=='E' and l[1:2].isdigit())
     if errs: return {'error': errs} if as_dict else f'err: {errs}'
     if not out.strip(): out = f'Applied to {path}'
     return {'success': out} if as_dict else out
-
 
 # %% ../nbs/01_core.ipynb #506e4cdd
 def ex_str(

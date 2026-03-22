@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.8
+
+### New Features
+
+- Improve ex() docstring with usage tips and suppress E749 errors ([#16](https://github.com/AnswerDotAI/safecmd/issues/16))
+
+
 ## 0.1.7
 
 ### New Features

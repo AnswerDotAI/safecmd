@@ -378,16 +378,19 @@ def ex(
     as_dict:bool=False # Return a dict response with 'success' or 'error' key
 ):
     """Run ex commands on a file via bash. Always runs in `noai` and `et` mode.
+    `x` is *always` added at the end, so do not add `wq` or `x` to `cmds`.
     Use `ex(path, linenums=True)` (i.e no cmds) to get an initial file listing with line numbers.
-    Can also be used to create new files (use `a` with a non-existent path).
-    ex commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc."""
+    Can also be used to create new files (use `a` with a non-existent path). Always end `a`/`i` blocks with `.` on its own line.
+    ex commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
+    Tip: `grep -n` / `rg -n` line numbers match ex addressing — find then fix.
+    Tip: use `#`, `@`, `+`, or `;` as alternate `s` delimiters to avoid escaping `/`. `|` won't work (command separator)."""
     cmds = cmds.strip()
     if linenums: cmds = (cmds + '\n' if cmds else '') + '%#'
     if cmds: cmds += '\n'
     cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\nset et\nset sw={sw}\n{cmds}x\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
     err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
-    errs = '\n'.join(l for l in err_lines if l[:1]=='E' and l[1:2].isdigit())
+    errs = '\n'.join(l for l in err_lines if l[:1]=='E' and l[1:2].isdigit() and "E749" not in l)
     if errs: return {'error': errs} if as_dict else f'err: {errs}'
     if not out.strip(): out = f'Applied to {path}'
     return {'success': out} if as_dict else out

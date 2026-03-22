@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.7
+
+### New Features
+
+- Add mkdir dest validation, `as_dict` param to bash, fix run stderr concatenation, silence IndexError debug prints, improve ex cmd handling ([#15](https://github.com/AnswerDotAI/safecmd/issues/15))
+
+
 ## 0.1.6
 
 ### New Features

@@ -384,6 +384,7 @@ def ex(
     ex commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
     Tip: `grep -n` / `rg -n` line numbers match ex addressing — find then fix.
     Tip: use `#`, `@`, `+`, or `;` as alternate `s` delimiters to avoid escaping `/`. `|` won't work (command separator)."""
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     cmds = cmds.strip()
     if linenums: cmds = (cmds + '\n' if cmds else '') + '%#'
     if cmds: cmds += '\n'
@@ -422,6 +423,7 @@ def sed(
     cmds:str, # The sed arguments to use (e.g `s/x/y/`, `1,$p`, …)
     inplace:bool=False, # Same as `sed -i '' …`
     quiet:bool=False, # Same as `sed -n …`
+    linenums:bool=False, # Show file with line numbers after (inplace) or number output lines
     as_dict:bool=False # Return a dict response
 ):
     """Run the `sed` command with the args in `argstr` (e.g for reading a section of a file)"""
@@ -430,9 +432,17 @@ def sed(
         err = DisallowedDest(path)
         if not validate_dest(path): return {'error': err} if as_dict else f'err: {err}'
         flags += "-i '' "
+    if linenums and quiet: raise ValueError("linenums and quiet can't be used together")
     if quiet: flags += "-n "
     try: res = safe_run(f"sed {flags}{shlex.quote(cmds)} {shlex.quote(path)}", add_cmds='sed')
     except IOError as e: return {'error': e} if as_dict else f'err: {e}'
+    if linenums:
+        if inplace:
+            with open(path) as f: lines = f.readlines()
+        else:
+            lines = res.splitlines(True)
+        w = len(str(len(lines)))
+        res = ''.join(f'{i+1:>{w}} {l}' for i,l in enumerate(lines))
     return {'success': res} if as_dict else res
 
 

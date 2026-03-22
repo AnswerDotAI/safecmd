@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.6
+
+### New Features
+
+- Add `ex_str` and sed tools, update ex with linenums/`as_dict`, fix run() stripping ([#14](https://github.com/AnswerDotAI/safecmd/issues/14))
+
+
 ## 0.1.5
 
 ### New Features

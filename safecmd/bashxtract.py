@@ -23,8 +23,8 @@ def parse_bash(cmd:str, shfmt:str='shfmt'):
 def part_text(p, cmd):
     "Extracts the text value from a single word part node in the shfmt AST."
     t = p.get('Type', '')
-    if t == 'Lit': return p['Value'].replace('\\ ', ' ')
-    if t == 'SglQuoted': return p['Value']
+    if t == 'Lit': return p.get('Value', '').replace('\\ ', ' ')
+    if t == 'SglQuoted': return p.get('Value', '')
     if t in ('DblQuoted', 'Hdoc'): return ''.join(part_text(x, cmd) for x in p.get('Parts', []))
     if t == 'ParamExp':
         name = p['Param']['Value']

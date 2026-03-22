@@ -5,13 +5,15 @@
 # %% auto #0
 __all__ = ['default_cfg', 'cfg_path', 'ok_dests', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedError',
            'DisallowedCmd', 'DisallowedDest', 'normalize_dest', 'validate_dest', 'validate', 'safe_run', 'bash',
-           'unsafe_bash', 'add_allowed_cmds', 'add_allowed_dests', 'rm_allowed_cmds', 'rm_allowed_dests', 'ex', 'main']
+           'unsafe_bash', 'add_allowed_cmds', 'add_allowed_dests', 'rm_allowed_cmds', 'rm_allowed_dests', 'ex',
+           'ex_str', 'sed', 'main']
 
 # %% ../nbs/01_core.ipynb #7e9a179e
 import subprocess,json,shutil,os,shlex
 from fastcore.utils import *
 from fastcore.xdg import xdg_config_home
 from configparser import ConfigParser
+from tempfile import NamedTemporaryFile
 
 from .bashxtract import *
 
@@ -20,12 +22,12 @@ def run(cmd, ignore_ex=False, split=False):
     "Run `cmd` in shell; return stdout (+ stderr if any); raise IOError on failure"
     res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if split:
-        out,err = res.stdout.strip(), res.stderr.strip()
+        out,err = res.stdout, res.stderr
         if ignore_ex: return (res.returncode, out, err)
         if res.returncode: raise IOError(err or out)
         return (out, err)
-    out = res.stdout.strip()
-    if res.stderr: out += ('\n' if out else '') + res.stderr.strip()
+    out = res.stdout
+    if res.stderr: out += ('\n' if out else '') + res.stderr
     if ignore_ex: return (res.returncode, out)
     if res.returncode: raise IOError(out)
     return out
@@ -299,6 +301,7 @@ def bash(
     rm_dests:str=None  # Temp remove these destinations from allow list
 ): # dict with 'success' or 'error' key; value is stdout+stderr for success, or error message otherwise
     """Run a bash shell command line safely and return the concatencated stdout and stderr.
+    Since it is run with `bash`, special chars like `$` and `*` are handled by the shell, so must be quoted if literal.
     `cmd` is parsed and all calls are checked against an allow-list.
     If the command is not allowed, STOP and inform the user of the command run and error details; so they can decide whether to whitelist
     it or run it themselves.
@@ -352,18 +355,64 @@ def rm_allowed_dests(dests):
 # %% ../nbs/01_core.ipynb #e03a70e1
 def ex(
     path:str, # The file to run `ex` on
-    cmds:str, # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
-    sw:int=4  # shiftwidth for in/dedent commands
+    cmds:str='', # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
+    sw:int=4,  # shiftwidth for in/dedent commands
+    linenums:bool=False, # Return file listing with line numbers as response? (adds `%#` as final command)
+    as_dict:bool=False # Return a dict response with 'success' or 'error' key
 ):
     """Run ex commands on a file via bash. Always runs in `noai` and `et` mode.
-    TIP: Great for in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
-    NB: for inserting/deleting/replacing lines/strs, use the dedicated tools like `str_replace`, not ex, where possible."""
+    Use `ex(path, linenums=True)` (i.e no cmds) to get an initial file listing with line numbers.
+    TIP: Commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc."""
+    if linenums: cmds += '\n%#'
     cmd = f"ex --clean -V1 {shlex.quote(path)} <<'EX_EOF'\nset noai\nset et\nset sw={sw}\n{cmds}\nx\nEX_EOF"
     rc,out,err = safe_run(cmd, ignore_ex=True, split=True)
     err_lines = err.split('Entering Ex mode.')[-1].splitlines()[1:]
-    errs = [l for l in err_lines if l[:1]=='E' and l[1:2].isdigit()]
-    if errs: return {'error': '\n'.join(errs)}
-    return {'success': out.splitlines()+err_lines[-1:] or f'Applied to {path}'}
+    errs = '\n'.join(l for l in err_lines if l[:1]=='E' and l[1:2].isdigit())
+    if errs: return {'error': errs} if as_dict else f'err: {errs}'
+    if not out.strip(): out = f'Applied to {path}'
+    return {'success': out} if as_dict else out
+
+
+# %% ../nbs/01_core.ipynb #506e4cdd
+def ex_str(
+    s:str, # The str to run `ex` on
+    cmds:str='', # The commands to run (a 'heredoc' is used automatically, so embedded newlines work
+    sw:int=4,  # shiftwidth for in/dedent commands
+    linenums:bool=False, # Include line numbers in response?
+    as_dict:bool=False # Return a dict response
+):
+    """Run ex commands on a str and return the modified str, with line numbers optionally included.
+    Use `ex_str(s, linenums=True)` (i.e no cmds) to get the str listing with line numbers.
+    Always runs in `noai` and `et` mode."""
+    with NamedTemporaryFile('w', suffix='.txt') as f:
+        f.write(s)
+        f.flush()
+        p = f.name
+        if linenums: return ex(p, linenums=True, sw=sw, as_dict=as_dict)
+        res = ex(p, cmds, sw=sw, as_dict=True)
+        if 'error' in res: return res if as_dict else f'err: {res["error"]}'
+        txt = Path(p).read_text()
+        return {'success': txt} if as_dict else txt
+
+# %% ../nbs/01_core.ipynb #499432dd
+def sed(
+    path:str, # The file to run `sed` on
+    cmds:str, # The sed arguments to use (e.g `s/x/y/`, `1,$p`, …)
+    inplace:bool=False, # Same as `sed -i '' …`
+    quiet:bool=False, # Same as `sed -n …`
+    as_dict:bool=False # Return a dict response
+):
+    """Run the `sed` command with the args in `argstr` (e.g for reading a section of a file)"""
+    flags = ''
+    if inplace:
+        err = DisallowedDest(path)
+        if not validate_dest(path): return {'error': err} if as_dict else f'err: {err}'
+        flags += "-i '' "
+    if quiet: flags += "-n "
+    try: res = safe_run(f"sed {flags}{shlex.quote(cmds)} {shlex.quote(path)}", add_cmds='sed')
+    except IOError as e: return {'error': e} if as_dict else f'err: {e}'
+    return {'success': res} if as_dict else res
+
 
 # %% ../nbs/01_core.ipynb #2140f5e2
 import argparse,sys

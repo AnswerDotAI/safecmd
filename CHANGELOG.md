@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.9
+
+### New Features
+
+- Add linenums support to sed and auto-create parent dirs in ex ([#17](https://github.com/AnswerDotAI/safecmd/issues/17))
+
+
 ## 0.1.8
 
 ### New Features

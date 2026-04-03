@@ -33,3 +33,6 @@ include = ["safecmd"]
 
 [tool.nbdev]
 custom_sidebar = false
+
+[tool.chkstyle]
+skip-path-re = "_modidx.py"

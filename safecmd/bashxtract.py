@@ -69,7 +69,7 @@ def visit_stmts(stmts, cmd, commands=None):
 
 # %% ../nbs/00_bashxtract.ipynb #2ba597a5
 _op_map = {10: '&&', 11: '||', 12: '|', 13: '|&', 54: '>', 55: '>>', 56: '<', 58: '<&', 59: '>&', 64: '&>', 65: '&>>'}
-_attr_ops = {'Background': '&', 'Semicolon': ';', 'Assigns': '='}
+_attr_ops = dict(Background='&', Semicolon=';', Assigns='=')
 
 def collect_ops(node, ops=None):
     "Walk AST node and collect all operators into a set"
@@ -89,8 +89,7 @@ def collect_redirects(node, cmd, redirects=None):
     if redirects is None: redirects = []
     if not isinstance(node, dict): return redirects
     for r in node.get('Redirs', []):
-        if (op := _write_ops.get(r.get('Op'))) and (word := r.get('Word')):
-            redirects.append((op, word_text(word, cmd)))
+        if (op := _write_ops.get(r.get('Op'))) and (word := r.get('Word')): redirects.append((op, word_text(word, cmd)))
     for v in node.values():
         if isinstance(v, dict): collect_redirects(v, cmd, redirects)
         elif isinstance(v, list): [collect_redirects(x, cmd, redirects) for x in v]
@@ -158,4 +157,3 @@ def extract_commands(cmd, shfmt='shfmt', exec_flags=None, dest_flags=None, dest_
     redirects.extend(extra_dests)
     
     return commands, ops, redirects
-

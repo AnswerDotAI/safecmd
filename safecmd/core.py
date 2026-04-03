@@ -62,10 +62,8 @@ class CmdSpec(BasicRepr):
         parts = s.split(':')
         name,denied,exec_flags,dest_flags,exec_pos,dest_pos = parts[0],None,None,None,None,None
         for p in parts[1:]:
-            if p.startswith('exec='):
-                exec_flags, exec_pos = cls._split_pos(p[5:].split('|'))
-            elif p.startswith('dest='):
-                dest_flags, dest_pos = cls._split_pos(p[5:].split('|'))
+            if p.startswith('exec='): exec_flags, exec_pos = cls._split_pos(p[5:].split('|'))
+            elif p.startswith('dest='): dest_flags, dest_pos = cls._split_pos(p[5:].split('|'))
             else: denied = p.split('|') if p else None
         return cls(name, denied, exec_flags, dest_flags, exec_pos, dest_pos)
         
@@ -326,10 +324,8 @@ def bash(
     try: res = safe_run(cmd, rm_cmds=rm_cmds, rm_dests=rm_dests)
     except PermissionError as e:
         eff_cmds, eff_dests = _eff_sets(rm_cmds=rm_cmds, rm_dests=rm_dests)
-        return {'error': e,
-            'allowed_cmds' : joins('; ' ,eff_cmds ),
-            'allowed_dests': joins('; ' ,eff_dests),
-            'suggestion': 'rerun using an allowed tool/dest, or ask user to provide permission'}
+        return dict(error=e, allowed_cmds=joins('; ', eff_cmds), allowed_dests=joins('; ', eff_dests),
+            suggestion='rerun using an allowed tool/dest, or ask user to provide permission')
     return {'success': res} if as_dict else res
 
 # %% ../nbs/01_core.ipynb #1ed78ed3
@@ -425,7 +421,7 @@ def sed(
     linenums:bool=False, # Show file with line numbers after (inplace) or number output lines
     as_dict:bool=False # Return a dict response
 ):
-    """Run the `sed` command with the args in `argstr` (e.g for reading a section of a file)"""
+    "Run the `sed` command with the args in `argstr` (e.g for reading a section of a file)"
     flags = ''
     if inplace:
         err = DisallowedDest(path)
@@ -438,8 +434,7 @@ def sed(
     if linenums:
         if inplace:
             with open(path) as f: lines = f.readlines()
-        else:
-            lines = res.splitlines(True)
+        else: lines = res.splitlines(True)
         w = len(str(len(lines)))
         res = ''.join(f'{i+1:>{w}} {l}' for i,l in enumerate(lines))
     return {'success': res} if as_dict else res
@@ -453,6 +448,10 @@ def main():
     p = argparse.ArgumentParser(description='Run a command (kinda) safely')
     p.add_argument('cmd', nargs=argparse.REMAINDER, help='Command and arguments')
     args = p.parse_args()
-    if not args.cmd: p.print_help(); sys.exit(1)
+    if not args.cmd:
+        p.print_help()
+        sys.exit(1)
     try: print(safe_run(' '.join(args.cmd)))
-    except DisallowedError as e: print(f"Command not allowed: {e}", file=sys.stderr); sys.exit(1)
+    except DisallowedError as e:
+        print(f"Command not allowed: {e}", file=sys.stderr)
+        sys.exit(1)

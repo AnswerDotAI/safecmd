@@ -32,6 +32,7 @@ version = {attr = "safecmd.__version__"}
 include = ["safecmd"]
 
 [tool.nbdev]
+allowed_cell_metadata_keys = ["solveit_ai"]
 custom_sidebar = false
 
 [tool.chkstyle]

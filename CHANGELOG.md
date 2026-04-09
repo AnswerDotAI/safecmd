@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.10
+
+### New Features
+
+- TERM=dumb ([#18](https://github.com/AnswerDotAI/safecmd/issues/18))
+- Add git merge-base to allowlist and alphabetize git commands ([#12](https://github.com/AnswerDotAI/safecmd/pull/12)), thanks to [@RensDimmendaal](https://github.com/RensDimmendaal)
+
+
 ## 0.1.9
 
 ### New Features

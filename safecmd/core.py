@@ -20,7 +20,8 @@ from .bashxtract import *
 # %% ../nbs/01_core.ipynb #2da56009
 def run(cmd, ignore_ex=False, split=False):
     "Run `cmd` in shell; return stdout (+ stderr if any); raise IOError on failure"
-    res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    env = {**os.environ, 'TERM': 'dumb'}
+    res = subprocess.run(cmd, shell=True, capture_output=True, text=True, env=env)
     if split:
         out,err = res.stdout, res.stderr
         if ignore_ex: return (res.returncode, out, err)
@@ -31,7 +32,6 @@ def run(cmd, ignore_ex=False, split=False):
     if ignore_ex: return (res.returncode, out)
     if res.returncode: raise IOError(out)
     return out
-
 
 # %% ../nbs/01_core.ipynb #a7683b2a
 class CmdSpec(BasicRepr):

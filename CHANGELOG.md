@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.11
+
+### New Features
+
+- Discover bash AST op codes dynamically instead of hardcoding ([#20](https://github.com/AnswerDotAI/safecmd/issues/20))
+- bash raise on error ([#19](https://github.com/AnswerDotAI/safecmd/pull/19)), thanks to [@RensDimmendaal](https://github.com/RensDimmendaal)
+
+
 ## 0.1.10
 
 ### New Features

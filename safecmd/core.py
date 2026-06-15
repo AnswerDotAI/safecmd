@@ -8,7 +8,7 @@ Docs: https://AnswerDotAI.github.io/safecmdcore.html.md"""
 __all__ = ['default_cfg', 'cfg_path', 'ok_dests', 'ok_cmds', 'run', 'CmdSpec', 'parse_cfg', 'validate_cmd', 'DisallowedError',
            'DisallowedCmd', 'DisallowedDest', 'normalize_dest', 'validate_dest', 'validate', 'safe_run', 'bash',
            'unsafe_bash', 'add_allowed_cmds', 'add_allowed_dests', 'rm_allowed_cmds', 'rm_allowed_dests', 'ex',
-           'ex_str', 'sed', 'main']
+           'ex_str', 'sed', 'rg', 'main']
 
 # %% ../nbs/01_core.ipynb #7e9a179e
 import subprocess,json,shutil,os,shlex
@@ -280,14 +280,15 @@ def validate(
         if not validate_dest(dest, dests): raise DisallowedDest(dest)
 
 
-# %% ../nbs/01_core.ipynb #41476e4f
+# %% ../nbs/01_core.ipynb #306cdb34
 def _eff_sets(cmds=None, dests=None, add_cmds=None, add_dests=None, rm_cmds=None, rm_dests=None):
     "Compute effective cmd specs and dest sets from defaults + overrides"
     eff_dests = _split_set(dests) if dests else ok_dests.copy()
     eff_cmds = _split_specs(cmds) if cmds else ok_cmds.copy()
     eff_dests |= _split_set(add_dests)
     eff_dests -= _split_set(rm_dests)
-    eff_cmds |= _split_specs(add_cmds)
+    new_cmds = _split_specs(add_cmds)
+    eff_cmds = (eff_cmds - new_cmds) | new_cmds
     eff_cmds -= {CmdSpec(c) for c in _split_set(rm_cmds)}
     return eff_cmds, eff_dests
 
@@ -442,6 +443,12 @@ def sed(
         res = ''.join(f'{i+1:>{w}} {l}' for i,l in enumerate(lines))
     return {'success': res} if as_dict else res
 
+
+# %% ../nbs/01_core.ipynb #8262cfd4
+def rg(args:str):
+    "Run ripgrep with `args` (which should *not* be escaped)"
+    with modified_env('RIPGREP_CONFIG_PATH'):
+        return safe_run(f'rg {args}', add_cmds='rg:--pre|--hostname-bin', rm_cmds=rm_cmds, rm_dests=rm_dests)
 
 # %% ../nbs/01_core.ipynb #2140f5e2
 import argparse,sys

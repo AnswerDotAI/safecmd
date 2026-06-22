@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.12
+
+### New Features
+
+- Add `rg` ([#21](https://github.com/AnswerDotAI/safecmd/issues/21))
+
+
 ## 0.1.11
 
 ### New Features

@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.13
+
+### New Features
+
+- Add `warn_cmds` for sed/cat, store cmd name in DisallowedCmd ([#22](https://github.com/AnswerDotAI/safecmd/issues/22))
+
+
 ## 0.1.12
 
 ### New Features

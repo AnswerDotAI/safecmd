@@ -197,7 +197,7 @@ def parse_cfg(cfg_str):
     cp = ConfigParser()
     cp.read_string(cfg_str)
     cfg = cp['DEFAULT']
-    ok_dests = _split_set(cfg.get('ok_dests', './, /tmp'))
+    ok_dests = _split_set(cfg.get('ok_dests', './, /dev/null, /tmp'))
     splitcmds = ','.join(cfg['ok_cmds'].splitlines())
     ok_cmds = _split_specs(splitcmds)
     return ok_dests, ok_cmds

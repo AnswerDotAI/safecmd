@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.14
+
+### New Features
+
+- Allow /dev/null as a default safe destination ([#23](https://github.com/AnswerDotAI/safecmd/pull/23)), thanks to [@ncoop57](https://github.com/ncoop57)
+
+
 ## 0.1.13
 
 ### New Features
@@ -159,4 +166,3 @@ API changes:
 ## 0.0.1
 
 - init release
-

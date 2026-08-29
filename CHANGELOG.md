@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.15
+
+### New Features
+
+- Support time-prefixed commands in bash parsing by handling TimeClause nodes and traversing their nested statements ([#24](https://github.com/AnswerDotAI/safecmd/issues/24))
+
+
 ## 0.1.14
 
 ### New Features

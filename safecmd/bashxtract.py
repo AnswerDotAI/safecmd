@@ -84,7 +84,7 @@ def visit_stmts(stmts, cmd, commands=None):
             commands.append([word_text(a, cmd) for a in args])
             for a in args:
                 for s in nested_stmts(a.get('Parts', [])): visit_stmts(s, cmd, commands)
-        for k in ('Cmd', 'X', 'Y', 'Cond', 'Loop'): visit(n.get(k))
+        for k in ('Cmd', 'X', 'Y', 'Cond', 'Loop', 'Stmt'): visit(n.get(k))
         for k in ('Stmts', 'Items', 'Cases', 'Then', 'Else', 'Do'): visit_stmts(n.get(k), cmd, commands)
     for s in stmts or []:
         visit(s)
@@ -157,7 +157,7 @@ def scan_flag_args(commands, exec_flags=None, dest_flags=None, dest_pos=None, ex
 # %% ../nbs/00_bashxtract.ipynb #9e038c02
 HANDLED_TYPES = {'File', 'CallExpr', 'BinaryCmd', 'Subshell', 'Block', 'IfClause', 'WhileClause', 
     'ForClause', 'CaseClause', 'CaseItem', 'FuncDecl', 'DeclClause', 'Lit', 'SglQuoted', 'DblQuoted',
-    'ParamExp', 'CmdSubst', 'ProcSubst', 'Hdoc', 'Word', 'WordIter', 'Redirect', 'Comment', 'ArithmExp', 'ArithmCmd'}
+    'ParamExp', 'CmdSubst', 'ProcSubst', 'Hdoc', 'Word', 'WordIter', 'Redirect', 'Comment', 'ArithmExp', 'ArithmCmd', 'TimeClause'}
 
 def check_types(node):
     "Raise ValueError if AST contains unhandled node types"

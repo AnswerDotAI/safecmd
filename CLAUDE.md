@@ -14,7 +14,7 @@ A library for safely running bash commands by validating them against allowlists
   - `00_bashxtract.ipynb`: Parses bash commands via shfmt AST, extracts commands/operators/redirects
   - `01_core.ipynb`: Validation logic, safe_run(), config handling, CLI
   - `index.ipynb`: Documentation homepage
-- **safecmd/**: Generated Python modules (via nbdev_export)
+- **safecmd/**: Generated Python modules (via nbdev-export)
 
 ## Key Concepts
 
@@ -28,8 +28,8 @@ A library for safely running bash commands by validating them against allowlists
 ## Workflow
 
 1. Edit notebooks in `nbs/`
-2. Run `nbdev_export` to generate Python modules
-3. Run `nbdev_test --path nbs/notebook.ipynb` to test
+2. Run `nbdev-export` to generate Python modules
+3. Run `nbdev-test nbs/notebook.ipynb` to test
 
 ## Testing
 

@@ -129,7 +129,7 @@ ok_cmds = cat, head, tail, less, more, bat
     gh release list, gh release view, gh run list, gh run view, gh workflow list, gh workflow view
     gh auth status, gh gist list, gh gist view, gh browse, gh search
     # nbdev
-    nbdev_export, nbdev_clean
+    nbdev-export, nbdev-clean
     # npm (read-only)
     npm list, npm ls, npm outdated, npm view, npm info, npm why, npm audit, npm config list, npm config get, npm search, npm pack
     # yarn (read-only)

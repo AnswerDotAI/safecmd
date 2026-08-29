@@ -129,15 +129,15 @@ print(cfg_path.read_text())
 ```
 
     [DEFAULT]
-    ok_dests = ./, /dev/null, /tmp
+    ok_dests = ./, /tmp, /Users/jhoward/aai-ws, /Users/jhoward/git, /dev/null
 
     ok_cmds = cat, head, tail, less, more, bat
         # Directory listing
         ls, tree, locate
         # Search
-        grep, rg, ag, ack, fgrep, egrep
+        grep, rg, ag, ack, fgrep, egrep, pgrep
         # Text processing
-        cut, sort, uniq, wc, tr, column
+        cut, sort, uniq, wc, tr, column, touch
         # File info
         file, stat, du, df, which, whereis, type
         # Comparison
@@ -149,19 +149,18 @@ print(cfg_path.read_text())
         # System info
         date, cal, uptime, whoami, hostname, uname, printenv
         # Utilities
-        echo, printf, yes, seq, basename, dirname, realpath
+        echo, printf, yes, seq, basename, dirname, realpath, sleep
         # Git (read-only)
-        git blame, git branch, git cat-file, git config --get, git config --list,
-        git describe, git diff, git log, git ls-files, git ls-tree, git merge-base,
-        git remote, git rev-parse, git shortlog, git show, git stash list, git status, git tag
-        # Git (workspace)
-        git fetch, git add, git commit, git switch, git checkout
+        git log, git show, git diff, git status,
+        git stash list, git blame, git shortlog, git describe, git rev-parse,
+        git ls-files, git ls-tree, git cat-file, git config --get, git config --list
+        git commit -am
         # gh
-        gh repo view, gh issue list, gh issue view, gh pr list, gh pr view, gh pr status, gh pr checks, gh pr diff
+        gh repo view, gh issue create, gh issue list, gh issue view, gh pr list, gh pr view, gh pr status, gh pr checks, gh pr diff
         gh release list, gh release view, gh run list, gh run view, gh workflow list, gh workflow view
         gh auth status, gh gist list, gh gist view, gh browse, gh search
         # nbdev
-        nbdev_export, nbdev_clean
+        nbdev-export, nbdev-clean, nbdev-test, nbdev-trust, nbdev-readme
         # npm (read-only)
         npm list, npm ls, npm outdated, npm view, npm info, npm why, npm audit, npm config list, npm config get, npm search, npm pack
         # yarn (read-only)
@@ -199,16 +198,27 @@ print(cfg_path.read_text())
         gcloud logging read
         # toolslm
         folder2ctx, repo2ctx
+        # Builtins
+        cd, pwd, export, test, [, true, false
         # Positional exec/dest handling
         env:exec=$0, xargs:exec=$0
-        tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1
+        tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1, mkdir:dest=$-1
         # Exec/dest flag handling
         find:-delete|-ok|-okdir:exec=-exec|-execdir
         rg:--pre
         tar:--use-compress-program|--transform|--checkpoint-action|--info-script|--new-volume-script:exec=--to-command|-I
-        curl:dest=-o|--output
-        # Builtins
-        cd, pwd, export, test, [, true, false
+        curl:dest=-o|--output|-O|--remote-name
+        # Extras
+        tools/run_tests.sh
+        # Python testing
+        pytest, chkstyle, maturin develop, maturin build
+        ./build.py
+        cargo run, cargo build, cargo fmt, cargo check, cargo clippy, cargo test
+        pandoc, screencapture
+        fixes
+        claude --bare -p --model sonnet
+        md2html, mdhtml, viewmd
+        quarto render
 
 ## How It Works
 

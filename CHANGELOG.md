@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.16
+
+### New Features
+
+- Improve prose docs across notebooks and treat >&file as a write redirect while ignoring fd duplication ([#25](https://github.com/AnswerDotAI/safecmd/issues/25))
+
+
 ## 0.1.15
 
 ### New Features

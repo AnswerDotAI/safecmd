@@ -1,4 +1,4 @@
-"""Core API for safecmd
+"""Validate shell commands and write destinations against allowlists, with Bash, ex, sed, and ripgrep tools
 
 Docs: https://AnswerDotAI.github.io/safecmd/core.html.md"""
 
@@ -393,6 +393,7 @@ def ex(
     ex commands include in/dedent, join, `g/pat/cmd`, copy/cut/paste, etc.
     Tip: `grep -n` / `rg -n` line numbers match ex addressing — find then fix.
     Tip: use `#`, `@`, `+`, or `;` as alternate `s` delimiters to avoid escaping `/`. `|` won't work (command separator)."""
+    if not validate_dest(path): raise DisallowedDest(path)
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     cmds = cmds.strip()
     if linenums: cmds = (cmds + '\n' if cmds else '') + '%#'

@@ -9,7 +9,7 @@ __all__ = ['HANDLED_TYPES', 'parse_bash', 'part_text', 'word_text', 'nested_stmt
            'collect_redirects', 'scan_flag_args', 'check_types', 'extract_commands']
 
 # %% ../nbs/00_bashxtract.ipynb #f67c4207
-import shlex,subprocess,json,shutil
+import shlex,subprocess,json,shutil,re
 from fastcore.utils import *
 
 # %% ../nbs/00_bashxtract.ipynb #3b43619d
@@ -117,7 +117,11 @@ def collect_redirects(node, cmd, redirects=None):
     if redirects is None: redirects = []
     if not isinstance(node, dict): return redirects
     for r in node.get('Redirs', []):
-        if (op := _write_ops.get(r.get('Op'))) and (word := r.get('Word')): redirects.append((op, word_text(word, cmd)))
+        if not (word := r.get('Word')): continue
+        op,dest = _redir_ops.get(r.get('Op')),word_text(word, cmd)
+        is_file = r.get('Op') in _write_ops
+        if op == '>&' and not r.get('N'): is_file = not (dest == '-' or re.fullmatch(r'[0-9]+-?', dest))
+        if is_file: redirects.append((op, dest))
     for v in node.values():
         if isinstance(v, dict): collect_redirects(v, cmd, redirects)
         elif isinstance(v, list): [collect_redirects(x, cmd, redirects) for x in v]

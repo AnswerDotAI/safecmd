@@ -15,7 +15,7 @@ import subprocess,json,shutil,os,shlex
 from fastcore.utils import *
 from fastcore.xdg import xdg_config_home
 from configparser import ConfigParser
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 
 from .bashxtract import *
 
@@ -231,13 +231,11 @@ def normalize_dest(dest):
     return os.path.normpath(os.path.abspath(dest))
 
 def validate_dest(dest, dests=None):
-    "Check if dest (resolved to absolute) matches an allowed destination pattern"
+    "Check if dest (resolved to absolute) is, or is inside, the system temp directory or an allowed destination"
     if dests is None: dests = ok_dests
     abs_dest = normalize_dest(dest)
-    for pattern in dests:
-        abs_pattern = normalize_dest(pattern)
-        if abs_dest.startswith(abs_pattern): return True
-    return False
+    roots = map(normalize_dest, (gettempdir(), *dests))
+    return any(abs_dest == r or abs_dest.startswith(r.rstrip(os.sep) + os.sep) for r in roots)
 
 # %% ../nbs/01_core.ipynb #892pxeqemg6
 def _build_flag_dicts(cmds):
